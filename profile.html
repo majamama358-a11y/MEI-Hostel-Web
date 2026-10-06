@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1e1864">
+  <title>Profile – Mahendra Hostel</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <style>
+    body {
+      background: #f8f7fc;
+      margin: 0;
+      padding: 0;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    .app-page {
+      background: #f8f7fc;
+      min-height: 100vh;
+      min-height: 100dvh;
+    }
+
+    /* Top Navy Section matching Screenshot 2 */
+    .profile-top-section {
+      background: linear-gradient(135deg, #1b145a 0%, #2b1d6f 55%, #3d248c 100%);
+      padding: calc(var(--safe-top) + 14px) 16px 140px;
+      position: relative;
+      border-radius: 0 0 36px 36px;
+      overflow: hidden;
+    }
+
+    /* Soft curved purple wave in the background behind avatar */
+    .profile-top-section::before {
+      content: '';
+      position: absolute;
+      top: -10px;
+      right: -20px;
+      width: 290px;
+      height: 290px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(140, 105, 240, 0.32) 0%, rgba(66, 35, 140, 0.1) 70%, transparent 80%);
+      pointer-events: none;
+    }
+
+    .profile-back-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      text-decoration: none;
+      position: relative;
+      z-index: 2;
+      transition: background 0.15s ease;
+    }
+
+    .profile-back-btn:hover, .profile-back-btn:active {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .profile-back-btn svg {
+      width: 26px;
+      height: 26px;
+      stroke: #ffffff;
+      stroke-width: 2.6;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    /* Large Circular Avatar matching Screenshot 2 */
+    .profile-avatar-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: #ffffff;
+      margin: 14px auto 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 26px rgba(0, 0, 0, 0.2);
+      position: relative;
+      z-index: 2;
+    }
+
+    .profile-avatar-icon {
+      width: 72px;
+      height: 72px;
+      fill: #9ca3af;
+    }
+
+    /* Content Pull Up Card matching Screenshot 2 */
+    .profile-content-container {
+      padding: 0 24px 40px;
+      max-width: 390px;
+      width: 100%;
+      margin: -70px auto 30px;
+      position: relative;
+      z-index: 5;
+      box-sizing: border-box;
+    }
+
+    .profile-white-card {
+      background: #ffffff;
+      border-radius: 28px;
+      padding: 34px 24px 80px;
+      box-shadow: 0 12px 36px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      animation: fadeIn 0.35s ease-out;
+    }
+
+    .profile-name-text {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #111827;
+      letter-spacing: 0.5px;
+      margin: 0;
+    }
+
+    .profile-reg-text {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #9ca3af;
+      margin: 6px 0 0;
+      letter-spacing: 0.3px;
+    }
+
+    .profile-divider {
+      border: none;
+      border-top: 1px solid #e5e7eb;
+      width: 82%;
+      margin: 20px auto;
+    }
+
+    .profile-detail-line {
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #111827;
+      margin: 10px 0;
+    }
+
+    .profile-phone-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 14px 0 32px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .profile-phone-icon {
+      width: 18px;
+      height: 18px;
+      color: #2563eb;
+      fill: currentColor;
+    }
+
+    /* Solid Navy LOGOUT Button matching Screenshot 2 */
+    .profile-logout-btn {
+      background: #231c6b;
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px 48px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(35, 28, 107, 0.3);
+      transition: transform 0.15s ease, background 0.15s ease;
+      display: inline-block;
+    }
+
+    .profile-logout-btn:hover {
+      background: #31278f;
+      transform: translateY(-1px);
+    }
+
+    .profile-logout-btn:active {
+      transform: translateY(1px);
+    }
+  </style>
+</head>
+<body>
+  <!-- Page Loader (Matching Screenshot 3) -->
+  <div id="page-loader" class="page-loader hidden">
+    <div class="spinner"></div>
+  </div>
+
+  <div id="toast-container"></div>
+  <div id="confirm-dialog" class="confirm-dialog"></div>
+
+  <div class="app-page">
+    <!-- Top Navy Section with Wave and Avatar matching Screenshot 2 -->
+    <div class="profile-top-section">
+      <a href="dashboard.html" class="profile-back-btn" aria-label="Back to Dashboard">
+        <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </a>
+
+      <!-- Large Circular White Avatar -->
+      <div class="profile-avatar-circle">
+        <svg class="profile-avatar-icon" viewBox="0 0 24 24">
+          <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- White Card Section matching Screenshot 2 -->
+    <div class="profile-content-container">
+      <div class="profile-white-card">
+        <!-- Student Name -->
+        <h2 class="profile-name-text" id="prof-name">KAVIRAJ S</h2>
+
+        <!-- Register Number -->
+        <div class="profile-reg-text" id="prof-reg">125UCS071</div>
+
+        <!-- Divider line -->
+        <hr class="profile-divider">
+
+        <!-- College -->
+        <div class="profile-detail-line" id="prof-college">MEC</div>
+
+        <!-- Department / Degree -->
+        <div class="profile-detail-line" id="prof-dept">BE (CSE)</div>
+
+        <!-- Room Number -->
+        <div class="profile-detail-line" id="prof-room">A403</div>
+
+        <!-- Phone Number with Blue Phone Icon -->
+        <div class="profile-phone-row">
+          <svg class="profile-phone-icon" viewBox="0 0 24 24">
+            <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.44-5.15-3.75-6.59-6.59l1.97-1.57c.28-.28.36-.67.25-1.02A11.36 11.36 0 0 1 8.56 4c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1 0 9.39 7.61 17 17 17 .55 0 1-.45 1-1v-3.5c0-.55-.45-1-1-1z"/>
+          </svg>
+          <span id="prof-phone">6379774984</span>
+        </div>
+
+        <!-- Logout Button -->
+        <button class="profile-logout-btn" id="logout-btn" onclick="handleLogout()">LOGOUT</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script src="js/firebase.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    function loadProfile() {
+      initFirebase();
+      const session = typeof checkSession === 'function' ? checkSession() : { valid: false };
+      const u = session.valid && session.user ? session.user : null;
+
+      if (!u) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      if (u.name) document.getElementById('prof-name').textContent = u.name;
+      if (u.registerNumber || u.regNo) document.getElementById('prof-reg').textContent = u.registerNumber || u.regNo;
+      if (u.college) document.getElementById('prof-college').textContent = u.college;
+      if (u.department) document.getElementById('prof-dept').textContent = u.department;
+      if (u.room) document.getElementById('prof-room').textContent = u.room;
+      if (u.phone) document.getElementById('prof-phone').textContent = u.phone;
+
+      PageLoader.hide();
+    }
+
+    function handleLogout() {
+      if (typeof clearSessionAndRedirect === 'function') {
+        clearSessionAndRedirect();
+      } else {
+        sessionStorage.clear();
+        localStorage.removeItem('mei_auth_token');
+        window.location.href = 'login.html';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadProfile);
+  </script>
+</body>
+</html>

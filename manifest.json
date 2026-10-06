@@ -1,0 +1,54 @@
+{
+  "name": "Mahendra Hostel - Student Management",
+  "short_name": "M Hostel",
+  "description": "Hostel student portal for Mahendra Engineering College. Pass requests, food choices, parcel pickup, and hostel attendance.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F0F2F9",
+  "theme_color": "#2878C8",
+  "categories": ["education", "utilities"],
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Pass Request",
+      "short_name": "New Pass",
+      "description": "Submit an outing or holiday pass request",
+      "url": "./request.html?action=new",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Pass Timing",
+      "short_name": "Timings",
+      "description": "Check hostel gate restrictions and pass rules",
+      "url": "./pass-timing.html",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Emergency Alert",
+      "short_name": "Emergency",
+      "description": "Send urgent medical or security assistance request",
+      "url": "./emergency.html",
+      "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

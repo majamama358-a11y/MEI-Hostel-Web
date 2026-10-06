@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#2878C8">
+  <title>Attendance – Mahendra Hostel</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <style>
+    .att-summary-card {
+      background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .att-summary-card::before {
+      content: '';
+      position: absolute;
+      right: -40px; top: -40px;
+      width: 150px; height: 150px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+    }
+    .att-stat { text-align: center; }
+    .att-stat-num { font-family: 'Nunito', sans-serif; font-size: 2rem; font-weight: 900; color: #fff; }
+    .att-stat-label { font-size: 0.78rem; color: rgba(255,255,255,0.75); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .att-stat-divider { width: 1.5px; height: 50px; background: rgba(255,255,255,0.25); }
+
+    .progress-ring-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .att-history-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: #fff;
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 8px;
+      transition: transform var(--transition-fast);
+    }
+    .att-history-item:active { transform: scale(0.99); }
+
+    .att-date { font-weight: 700; font-size: 0.95rem; color: var(--text-primary); }
+    .att-day { font-size: 0.78rem; color: var(--text-secondary); font-weight: 500; }
+
+    .att-status-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+    .att-status-tag.present { background: var(--success-light); color: #15803D; }
+    .att-status-tag.absent { background: var(--danger-light); color: #B91C1C; }
+    .att-status-tag.leave { background: var(--warning-light); color: #B45309; }
+
+    .att-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .att-dot.present { background: var(--success); }
+    .att-dot.absent { background: var(--danger); }
+    .att-dot.leave { background: var(--warning); }
+  </style>
+</head>
+<body>
+  <div id="page-loader" class="page-loader">
+    <div class="loader-logo">
+      <img src="assets/icons/mei-logo.png" alt="MEI Logo" style="width:48px;height:auto">
+    </div>
+    <div class="spinner"></div>
+  </div>
+
+  <div id="toast-container"></div>
+  <div id="confirm-dialog" class="confirm-dialog"></div>
+
+  <!-- Drawer -->
+  <div id="drawer-overlay" class="drawer-overlay"></div>
+  <nav id="nav-drawer" class="drawer" role="navigation" aria-label="Main Navigation">
+    <div class="drawer-header">
+      <div class="drawer-logo-card">
+        <img src="assets/icons/mei-logo.png" alt="MEI Logo">
+      </div>
+      <div class="drawer-app-title">MEI Hostel</div>
+    </div>
+
+    <div class="drawer-nav">
+      <!-- 1. Request List -->
+      <a href="request.html" class="drawer-item ripple" data-page="request.html">
+        <span class="drawer-item-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+          </svg>
+        </span>
+        <span class="drawer-item-text">Request List</span>
+      </a>
+
+      <!-- 2. Pass Timing -->
+      <a href="pass-timing.html" class="drawer-item ripple" data-page="pass-timing.html">
+        <span class="drawer-item-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+          </svg>
+        </span>
+        <span class="drawer-item-text">Pass Timing</span>
+      </a>
+
+      <!-- 3. Emergency Request -->
+      <a href="emergency.html" class="drawer-item ripple" data-page="emergency.html">
+        <span class="drawer-item-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-5-8h2v3h3v2h-3v3h-2v-3H9v-2h3V8z"/>
+          </svg>
+        </span>
+        <span class="drawer-item-text">Emergency Request</span>
+      </a>
+
+      <!-- 4. Parcel Scan -->
+      <a href="parcel.html" class="drawer-item ripple" data-page="parcel.html">
+        <span class="drawer-item-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M2 9V4a2 2 0 0 1 2-2h5v2.5H4.5v4.5H2zm0 6v5a2 2 0 0 0 2 2h5v-2.5H4.5V15H2zm13 7h5a2 2 0 0 0 2-2v-5h-2.5v4.5H15V22zm5-13h2V4a2 2 0 0 0-2-2h-5v2.5h4.5V9H22zM7 7h3v3H7V7zm0 7h3v3H7v-3zm7-7h3v3h-3V7zm0 7h1.5v1.5H14V14zm1.5 1.5H17V17h-1.5v-1.5zm-1.5 1.5h1.5V18.5H14V17zm3-1.5H18.5V14H17v1.5z"/>
+          </svg>
+        </span>
+        <span class="drawer-item-text">Parcel Scan</span>
+      </a>
+
+      <!-- 5. Food Choice -->
+      <a href="food.html" class="drawer-item ripple" data-page="food.html">
+        <span class="drawer-item-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M4 2h16a2.5 2.5 0 0 1 2.5 2.5v15a2.5 2.5 0 0 1-2.5 2.5H4A2.5 2.5 0 0 1 1.5 19.5v-15A2.5 2.5 0 0 1 4 2zm6.25 4.5v3.25c0 .6-.45 1.1-1.05 1.1v5.65H7.8V10.85c-.6 0-1.05-.5-1.05-1.1V6.5h.7v2.6h.5V6.5h.7v2.6h.5V6.5h1.1zm4.75-.25a1.8 1.8 0 0 0-1.8 1.8v3.95h.6v6.5h1.1v-6.5h.6V8.05c0-1-.8-1.8-1.8-1.8z"/>
+          </svg>
+        </span>
+        <span class="drawer-item-text">Food Choice</span>
+      </a>
+
+      <!-- 6. Change Password -->
+      <a href="change-password.html" class="drawer-item ripple" data-page="change-password.html">
+        <span class="drawer-item-icon">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M19.7 7.3c1.2-1.2 1.2-3.1 0-4.2-1.2-1.2-3.1-1.2-4.2 0L6.4 12.2c-.4.4-.7.9-.8 1.4L4.1 19c-.3 1 .6 1.9 1.6 1.6l5.4-1.5c.5-.1 1-.4 1.4-.8l9.2-9.2v-1.8zm-3.6-1.4a1.2 1.2 0 1 0-1.7-1.7 1.2 1.2 0 0 0 1.7 1.7z"/>
+          </svg>
+        </span>
+        <span class="drawer-item-text">Change Password</span>
+      </a>
+
+      <!-- 7. Profile -->
+      <a href="profile.html" class="drawer-item ripple" data-page="profile.html">
+        <span class="drawer-item-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </span>
+        <span class="drawer-item-text">Profile</span>
+      </a>
+
+      <!-- 8. Logout -->
+      <a href="#" class="drawer-item ripple" id="drawer-logout-btn">
+        <span class="drawer-item-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+        </span>
+        <span class="drawer-item-text">Logout</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="app-page">
+    <header class="app-header">
+      <div class="header-left">
+        <a href="dashboard.html" class="header-btn" aria-label="Back"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></a>
+      </div>
+      <div class="header-center"><div class="header-title">Attendance</div></div>
+      <div class="header-right">
+        <button class="header-btn" id="hamburger-btn"><svg viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <!-- Summary Card -->
+      <div class="att-summary-card">
+        <div class="att-stat">
+          <div class="att-stat-num" id="att-present">24</div>
+          <div class="att-stat-label">Present</div>
+        </div>
+        <div class="att-stat-divider"></div>
+        <div class="att-stat">
+          <div class="att-stat-num" id="att-absent">2</div>
+          <div class="att-stat-label">Absent</div>
+        </div>
+        <div class="att-stat-divider"></div>
+        <!-- Circular Progress -->
+        <div class="progress-ring-wrap">
+          <svg width="72" height="72" viewBox="0 0 72 72">
+            <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="6"/>
+            <circle id="progress-circle" cx="36" cy="36" r="30" fill="none" stroke="#fff" stroke-width="6"
+              stroke-linecap="round"
+              stroke-dasharray="188.5"
+              stroke-dashoffset="188.5"
+              transform="rotate(-90 36 36)"
+              style="transition: stroke-dashoffset 1.2s ease"/>
+          </svg>
+          <div style="position:absolute;text-align:center">
+            <div id="att-pct" style="font-family:'Nunito';font-size:1rem;font-weight:900;color:#fff;line-height:1.1">92%</div>
+            <div style="font-size:0.6rem;color:rgba(255,255,255,0.7);font-weight:600">Rate</div>
+          </div>
+          <div style="position:relative">
+            <div style="font-size:0.72rem;color:rgba(255,255,255,0.8);font-weight:600;text-align:center;margin-top:-48px">Attendance</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Today's Status -->
+      <div class="card" style="margin-bottom:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div>
+            <div style="font-size:0.8rem;color:var(--text-muted);font-weight:600;margin-bottom:4px">TODAY</div>
+            <div id="today-date-att" style="font-family:'Nunito';font-size:1.05rem;font-weight:800">—</div>
+          </div>
+          <div id="today-status-att" class="att-status-tag present">
+            <div class="att-dot present"></div>
+            Present
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="setAttFilter('all', this)">All</button>
+        <button class="filter-tab" onclick="setAttFilter('week', this)">This Week</button>
+        <button class="filter-tab" onclick="setAttFilter('month', this)">This Month</button>
+      </div>
+
+      <!-- Attendance History -->
+      <div class="section-title">Attendance History</div>
+      <div id="attendance-list" class="card-list"></div>
+    </main>
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav" role="navigation" aria-label="Bottom Navigation">
+    <a href="dashboard.html" class="bottom-nav-item" aria-label="Dashboard">
+      <div class="bnav-icon-wrap">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      Home
+    </a>
+    <a href="request.html" class="bottom-nav-item" aria-label="Requests">
+      <div class="bnav-icon-wrap">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      </div>
+      Requests
+    </a>
+    <a href="request.html#new" class="bottom-nav-fab" aria-label="New Request">
+      <div class="bnav-fab-circle">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <span class="bnav-fab-label">New</span>
+    </a>
+    <a href="attendance.html" class="bottom-nav-item active" aria-label="Attendance">
+      <div class="bnav-icon-wrap">
+        <svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      Attendance
+    </a>
+    <a href="profile.html" class="bottom-nav-item" aria-label="Profile">
+      <div class="bnav-icon-wrap">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      Profile
+    </a>
+  </nav>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="js/firebase.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+
+  <script>
+    initFirebase();
+    const DEFAULT_ATTENDANCE = [
+      { date: '05-10-2026', status: 'present' },
+      { date: '04-10-2026', status: 'present' },
+      { date: '03-10-2026', status: 'present' },
+      { date: '02-10-2026', status: 'absent' },
+      { date: '01-10-2026', status: 'present' },
+      { date: '30-09-2026', status: 'present' }
+    ];
+    let attendanceData = [...DEFAULT_ATTENDANCE];
+
+    // Auth
+    const session = typeof checkSession === 'function' ? checkSession() : { valid: false };
+    if (session.valid && session.user) {
+      loadAttendance();
+    } else if (typeof firebase !== 'undefined' && auth) {
+      auth.onAuthStateChanged(user => {
+        if (user) loadAttendanceFromFirebase(user.uid);
+        else window.location.href = 'login.html';
+      });
+    } else {
+      window.location.href = 'login.html';
+    }
+
+    function loadAttendance() {
+      const present = attendanceData.filter(a => a.status === 'present').length;
+      const absent = attendanceData.filter(a => a.status === 'absent').length;
+      const total = present + absent;
+      const pct = total > 0 ? Math.round((present / total) * 100) : 0;
+
+      document.getElementById('att-present').textContent = present;
+      document.getElementById('att-absent').textContent = absent;
+      document.getElementById('att-pct').textContent = `${pct}%`;
+
+      // Animate progress circle
+      const circle = document.getElementById('progress-circle');
+      const circumference = 188.5;
+      setTimeout(() => {
+        circle.style.strokeDashoffset = circumference - (pct / 100) * circumference;
+      }, 300);
+
+      // Today
+      const now = new Date();
+      document.getElementById('today-date-att').textContent = now.toLocaleDateString('en-IN', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+
+      const todayAtt = attendanceData[0];
+      const statusEl = document.getElementById('today-status-att');
+      if (todayAtt?.status === 'absent') {
+        statusEl.innerHTML = '<div class="att-dot absent"></div> Absent';
+        statusEl.className = 'att-status-tag absent';
+      }
+
+      renderAttendance(attendanceData);
+      PageLoader.hide();
+    }
+
+    async function loadAttendanceFromFirebase(uid) {
+      try {
+        // Load from Firebase
+        const snap = await DB.attendance().once('value');
+        if (snap.exists()) {
+          const data = snap.val();
+          attendanceData = Object.entries(data).map(([date, records]) => ({
+            date,
+            status: records[uid]?.status || 'absent'
+          })).sort((a, b) => b.date.localeCompare(a.date));
+        }
+      } catch(e) { console.warn('Using demo data'); }
+      loadAttendance();
+    }
+
+    function setAttFilter(filter, btn) {
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+
+      if (filter === 'all') {
+        renderAttendance(attendanceData);
+      } else if (filter === 'week') {
+        renderAttendance(attendanceData.slice(0, 7));
+      } else if (filter === 'month') {
+        renderAttendance(attendanceData.slice(0, 30));
+      }
+    }
+
+    function renderAttendance(data) {
+      const container = document.getElementById('attendance-list');
+      if (data.length === 0) {
+        container.innerHTML = `<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><div class="empty-title">No attendance records</div><div class="empty-subtitle">Attendance will appear here once marked.</div></div>`;
+        return;
+      }
+
+      container.innerHTML = data.map((att, idx) => {
+        const dateStr = att.date;
+        const [d, m, y] = dateStr.split('-');
+        const dateObj = new Date(`${y}-${m}-${d}`);
+        const dayName = isNaN(dateObj) ? '' : dateObj.toLocaleDateString('en-IN', { weekday: 'long' });
+        const statusClass = att.status || 'absent';
+        const statusLabel = statusClass === 'present' ? 'Present' : statusClass === 'leave' ? 'On Leave' : 'Absent';
+
+        return `
+        <div class="att-history-item" style="animation:slideUp 0.3s ease ${idx * 0.04}s both">
+          <div>
+            <div class="att-date">${dateStr}</div>
+            <div class="att-day">${dayName}</div>
+          </div>
+          <div class="att-status-tag ${statusClass}">
+            <div class="att-dot ${statusClass}"></div>
+            ${statusLabel}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    document.getElementById('drawer-logout-btn').addEventListener('click', () => {
+      Confirm.show({ title: 'Logout', message: 'Are you sure?', icon: 'warning', confirmText: 'Logout', cancelText: 'Stay', danger: true,
+        onConfirm: () => {
+          if (typeof clearSessionAndRedirect === 'function') clearSessionAndRedirect();
+          else { sessionStorage.clear(); window.location.href = 'login.html'; }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#2878C8">
+  <meta name="description" content="Mahendra Hostel - Staff & Warden Administration Portal">
+  <title>Staff Portal – Mahendra Hostel</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <style>
+    .staff-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #fff;
+    }
+    .staff-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    @media (min-width: 640px) {
+      .staff-stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    .staff-stat-card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border: 2px solid transparent;
+    }
+    .staff-stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .staff-stat-card.active-tab-stat {
+      border-color: var(--primary);
+    }
+    .staff-stat-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    .staff-stat-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+    .staff-stat-value {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: var(--text-primary);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .staff-stat-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+    }
+
+    /* Staff Navigation Tabs */
+    .staff-tabs {
+      display: flex;
+      background: #fff;
+      padding: 6px;
+      border-radius: var(--radius-md);
+      gap: 6px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow-sm);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .staff-tabs::-webkit-scrollbar { display: none; }
+    .staff-tab-btn {
+      flex: 1;
+      min-width: 110px;
+      padding: 10px 14px;
+      border: none;
+      background: transparent;
+      border-radius: var(--radius-sm);
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+    .staff-tab-btn.active {
+      background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(50,21,143,0.22);
+    }
+    .staff-tab-badge {
+      background: rgba(255,255,255,0.25);
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+    .staff-tab-btn:not(.active) .staff-tab-badge {
+      background: #E2E8F0;
+      color: var(--text-primary);
+    }
+
+    /* Pass Request Cards in Warden view */
+    .warden-pass-card {
+      background: #fff;
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 16px;
+      border-left: 5px solid #CBD5E1;
+      transition: box-shadow 0.2s ease;
+    }
+    .warden-pass-card.pending { border-left-color: var(--warning); }
+    .warden-pass-card.approved { border-left-color: var(--success); }
+    .warden-pass-card.rejected { border-left-color: var(--danger); }
+
+    .warden-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .student-badge-info {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .student-avatar-letter {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #2878C8, #42158F);
+      color: #fff;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .student-meta-name {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.98rem;
+      color: var(--text-primary);
+    }
+    .student-meta-sub {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 2px;
+    }
+    .warden-pass-grid {
+      background: var(--bg);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 12px 0;
+      font-size: 0.82rem;
+    }
+    .warden-grid-item-lbl {
+      color: var(--text-secondary);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .warden-grid-item-val {
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-top: 2px;
+    }
+    .warden-card-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    /* Modal for Reject */
+    .rejection-preset {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      background: #F1F5F9;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 3px;
+      cursor: pointer;
+      border: 1px solid #E2E8F0;
+      transition: background 0.15s ease;
+    }
+    .rejection-preset:hover {
+      background: #E2E8F0;
+    }
+
+    /* Roll Call table styles */
+    .roll-item {
+      background: #fff;
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .roll-status-btns {
+      display: flex;
+      gap: 6px;
+    }
+    .roll-btn {
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      font-weight: 800;
+      border: 1.5px solid #CBD5E1;
+      background: #fff;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .roll-btn.present.active {
+      background: #DCFCE7;
+      color: #15803D;
+      border-color: #22C55E;
+    }
+    .roll-btn.absent.active {
+      background: #FEE2E2;
+      color: #B91C1C;
+      border-color: #EF4444;
+    }
+    .roll-btn.pass.active {
+      background: #FEF3C7;
+      color: #B45309;
+      border-color: #F59E0B;
+    }
+
+    /* Top banner switch */
+    .role-switch-banner {
+      background: #1E293B;
+      color: #fff;
+      padding: 8px 16px;
+      font-size: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+    }
+    .role-switch-btn {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Page Loader -->
+  <div id="page-loader" class="page-loader">
+    <div class="loader-logo">
+      <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><rect x="9" y="7" width="2" height="3"/><rect x="13" y="7" width="2" height="3"/><rect x="9" y="13" width="2" height="3"/><rect x="13" y="13" width="2" height="3"/><path d="M10 22v-3h4v3"/></svg>
+    </div>
+    <div class="spinner"></div>
+    <p style="margin-top:16px;color:var(--text-secondary);font-size:0.9rem;font-weight:600">Loading Warden Portal...</p>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Confirm Dialog -->
+  <div id="confirm-dialog" class="confirm-dialog"></div>
+
+  <!-- Top Demo Switcher Ribbon -->
+  <div class="role-switch-banner">
+    <span>Staff / Warden Portal View</span>
+    <a href="dashboard.html" class="role-switch-btn" onclick="switchToStudent()">Switch to Student View</a>
+  </div>
+
+  <!-- App Page -->
+  <div class="app-page">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="drawer-logo" style="width:38px;height:38px;border-radius:12px;margin:0">
+            <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M10 22v-3h4v3"/></svg>
+          </div>
+          <div>
+            <div style="font-family:'Nunito',sans-serif;font-weight:900;font-size:1.05rem;line-height:1.2">MAHENDRA HOSTEL</div>
+            <div style="font-size:0.75rem;opacity:0.9">Warden & Admin Desk</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="staff-badge">WARDEN</span>
+          <button class="header-btn" id="logout-btn" title="Logout" aria-label="Logout">
+            <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="page-content" style="max-width:800px;margin:0 auto;width:100%">
+      <!-- Warden Profile Mini Bar -->
+      <div class="glass-card" style="padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:0.76rem;color:var(--text-secondary);font-weight:700">CURRENT USER</div>
+          <div style="font-family:'Nunito',sans-serif;font-size:1.02rem;font-weight:900;color:var(--text-primary)" id="warden-name">RAJAN K</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:0.76rem;color:var(--text-secondary);font-weight:700">DATE</div>
+          <div style="font-size:0.86rem;font-weight:800;color:var(--primary)" id="current-date-disp">29-09-2026</div>
+        </div>
+      </div>
+
+      <!-- Quick KPI Stats Cards -->
+      <div class="staff-stats-grid">
+        <div class="staff-stat-card active-tab-stat" id="stat-card-passes" onclick="switchStaffTab('passes')">
+          <div class="staff-stat-icon" style="background:#FEF3C7">
+            <svg viewBox="0 0 24 24" style="stroke:#D97706"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="staff-stat-value" id="kpi-pending-passes">1</div>
+          <div class="staff-stat-title">Pending Passes</div>
+        </div>
+
+        <div class="staff-stat-card" id="stat-card-attendance" onclick="switchStaffTab('attendance')">
+          <div class="staff-stat-icon" style="background:#DCFCE7">
+            <svg viewBox="0 0 24 24" style="stroke:#15803D"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+          <div class="staff-stat-value" id="kpi-attendance-pct">80%</div>
+          <div class="staff-stat-title">Hostel Presence</div>
+        </div>
+
+        <div class="staff-stat-card" id="stat-card-parcels" onclick="switchStaffTab('parcels')">
+          <div class="staff-stat-icon" style="background:#E0F2FE">
+            <svg viewBox="0 0 24 24" style="stroke:#0284C7"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          </div>
+          <div class="staff-stat-value" id="kpi-unclaimed-parcels">1</div>
+          <div class="staff-stat-title">Pending Parcels</div>
+        </div>
+
+        <div class="staff-stat-card" id="stat-card-emergency" onclick="switchStaffTab('emergency')">
+          <div class="staff-stat-icon" style="background:#FEE2E2">
+            <svg viewBox="0 0 24 24" style="stroke:#DC2626"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+          </div>
+          <div class="staff-stat-value" id="kpi-emergency-alerts">0</div>
+          <div class="staff-stat-title">Active SOS</div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="staff-tabs">
+        <button class="staff-tab-btn active" id="tab-btn-passes" onclick="switchStaffTab('passes')">
+          <span>Pass Approvals</span>
+          <span class="staff-tab-badge" id="badge-pass-count">1</span>
+        </button>
+        <button class="staff-tab-btn" id="tab-btn-parcels" onclick="switchStaffTab('parcels')">
+          <span>Parcels</span>
+          <span class="staff-tab-badge" id="badge-parcel-count">1</span>
+        </button>
+        <button class="staff-tab-btn" id="tab-btn-attendance" onclick="switchStaffTab('attendance')">
+          <span>Roll Call</span>
+        </button>
+        <button class="staff-tab-btn" id="tab-btn-emergency" onclick="switchStaffTab('emergency')">
+          <span>Emergency Feed</span>
+        </button>
+      </div>
+
+      <!-- TAB 1: PASS APPROVALS -->
+      <section id="section-passes" class="staff-tab-pane">
+        <!-- Search and Filter bar -->
+        <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+          <div class="input-group" style="flex:1;min-width:200px;margin-bottom:0">
+            <div class="input-icon">
+              <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <input type="text" id="pass-search" class="form-input" placeholder="Search student, room, reg no..." style="background:#fff">
+          </div>
+
+          <div style="display:flex;gap:4px;background:#fff;border-radius:var(--radius-sm);padding:3px;box-shadow:var(--shadow-sm)">
+            <button class="filter-tab active" onclick="setWardenFilter('pending', this)">Pending</button>
+            <button class="filter-tab" onclick="setWardenFilter('approved', this)">Approved</button>
+            <button class="filter-tab" onclick="setWardenFilter('all', this)">All</button>
+          </div>
+        </div>
+
+        <!-- Requests list -->
+        <div id="warden-requests-container"></div>
+      </section>
+
+      <!-- TAB 2: PARCEL LOGGING -->
+      <section id="section-parcels" class="staff-tab-pane" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div>
+            <h2 style="font-family:'Nunito';font-size:1.1rem;font-weight:900">Hostel Parcel Desk</h2>
+            <p style="font-size:0.8rem;color:var(--text-secondary)">Log received delivery parcels and verify handovers</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openLogParcelModal()">
+            + Log New Parcel
+          </button>
+        </div>
+
+        <div id="warden-parcels-container"></div>
+      </section>
+
+      <!-- TAB 3: ATTENDANCE ROLL CALL -->
+      <section id="section-attendance" class="staff-tab-pane" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <div>
+            <h2 style="font-family:'Nunito';font-size:1.1rem;font-weight:900">Night Roll Call (9:00 PM)</h2>
+            <p style="font-size:0.8rem;color:var(--text-secondary)">Quickly tap to toggle student status</p>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="markAllPresent()">
+            Mark All Present
+          </button>
+        </div>
+
+        <div id="warden-attendance-container"></div>
+
+        <div style="margin-top:16px">
+          <button class="btn btn-primary btn-block" onclick="saveRollCall()">
+            Save Roll Call Report
+          </button>
+        </div>
+      </section>
+
+      <!-- TAB 4: EMERGENCY ALERTS -->
+      <section id="section-emergency" class="staff-tab-pane" style="display:none">
+        <div style="margin-bottom:14px">
+          <h2 style="font-family:'Nunito';font-size:1.1rem;font-weight:900">Emergency & Medical Requests</h2>
+          <p style="font-size:0.8rem;color:var(--text-secondary)">High-priority alerts sent by hostellers</p>
+        </div>
+
+        <div id="warden-emergency-container"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Reject Reason Modal -->
+  <div id="reject-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-title" style="color:var(--danger)">Reject Pass Request</span>
+        <button class="modal-close" onclick="Modal.close('reject-modal')">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <p style="font-size:0.84rem;color:var(--text-secondary);margin-bottom:14px">
+        Provide an official reason for rejecting this pass request:
+      </p>
+
+      <div style="margin-bottom:12px">
+        <div style="font-size:0.75rem;font-weight:700;color:var(--text-secondary);margin-bottom:6px">Quick Suggestions:</div>
+        <div>
+          <span class="rejection-preset" onclick="setRejectReason('Insufficient leave balance / frequent outings')">Frequent Outings</span>
+          <span class="rejection-preset" onclick="setRejectReason('Parent approval letter missing')">Parent Consent Missing</span>
+          <span class="rejection-preset" onclick="setRejectReason('Upcoming internal examination')">Internal Exams</span>
+          <span class="rejection-preset" onclick="setRejectReason('Outing timing exceeds hostel rules')">Invalid Timing</span>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <textarea id="reject-reason-text" class="form-input" rows="3" placeholder="Enter custom rejection reason..." required></textarea>
+      </div>
+
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-secondary" onclick="Modal.close('reject-modal')" style="flex:1">Cancel</button>
+        <button class="btn btn-danger" id="confirm-reject-btn" style="flex:1">Confirm Reject</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log Parcel Modal -->
+  <div id="log-parcel-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-title">Log Incoming Courier</span>
+        <button class="modal-close" onclick="Modal.close('log-parcel-modal')">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form id="log-parcel-form">
+        <div class="input-group">
+          <label class="form-label">Parcel Tracking / ID *</label>
+          <input type="text" id="parcel-input-id" class="form-input" placeholder="e.g. P-2026-003 or Courier AWB" required>
+        </div>
+
+        <div class="input-group">
+          <label class="form-label">Student Roll Number *</label>
+          <input type="text" id="parcel-input-reg" class="form-input" placeholder="e.g. 125UCS071" required>
+        </div>
+
+        <div class="input-group">
+          <label class="form-label">Student Name</label>
+          <input type="text" id="parcel-input-name" class="form-input" placeholder="e.g. KAVIRAJ S">
+        </div>
+
+        <div class="input-group">
+          <label class="form-label">Courier Service</label>
+          <input type="text" id="parcel-input-carrier" class="form-input" placeholder="e.g. Amazon, Flipkart, BlueDart">
+        </div>
+
+        <div class="input-group">
+          <label class="form-label">Description / Remarks</label>
+          <input type="text" id="parcel-input-desc" class="form-input" placeholder="e.g. Small Carton Box, Shelf B4">
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Add to Parcel Registry</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="js/firebase.js"></script>
+  <script src="js/utils.js"></script>
+
+  <script>
+    window.location.replace('admin-panel.html');
+  </script>
+
+      // Requests
+      const storedReqs = localStorage.getItem('mei_shared_requests');
+      if (storedReqs) {
+        wardenRequests = JSON.parse(storedReqs);
+      } else {
+        wardenRequests = [...DEMO_REQUESTS];
+        localStorage.setItem('mei_shared_requests', JSON.stringify(wardenRequests));
+      }
+
+      // Parcels
+      const storedParcels = localStorage.getItem('mei_shared_parcels');
+      if (storedParcels) {
+        wardenParcels = JSON.parse(storedParcels);
+      } else {
+        wardenParcels = [
+          { id: 'P-2026-001', studentName: 'KAVIRAJ S', registerNumber: '125UCS071', arrivalDate: '27-09-2026', description: 'Books - Amazon Package', carrier: 'Amazon', status: 'pending' },
+          { id: 'P-2026-002', studentName: 'ARJUN R', registerNumber: '125UCS072', arrivalDate: '25-09-2026', description: 'Electronics - Flipkart', carrier: 'Flipkart', status: 'collected' }
+        ];
+        localStorage.setItem('mei_shared_parcels', JSON.stringify(wardenParcels));
+      }
+
+      // Students for roll call
+      wardenStudents = [
+        { uid: 'stu_001', name: 'KAVIRAJ S', regNo: '125UCS071', room: 'A403', dept: 'BE (CSE)', status: 'present' },
+        { uid: 'stu_002', name: 'ARJUN R', regNo: '125UCS072', room: 'A404', dept: 'BE (CSE)', status: 'present' },
+        { uid: 'stu_003', name: 'GOWTHAM M', regNo: '125UCS073', room: 'B201', dept: 'BE (ECE)', status: 'pass' },
+        { uid: 'stu_004', name: 'VISHNU P', regNo: '125UCS074', room: 'B202', dept: 'BE (MECH)', status: 'present' },
+        { uid: 'stu_005', name: 'DINESH K', regNo: '125UCS075', room: 'C101', dept: 'BE (EEE)', status: 'absent' }
+      ];
+
+      updateKPIs();
+      renderPasses();
+      renderParcels();
+      renderAttendance();
+      renderEmergency();
+      PageLoader.hide();
+    }
+
+    function updateKPIs() {
+      const pendingCount = wardenRequests.filter(r => r.status === 'pending').length;
+      document.getElementById('kpi-pending-passes').textContent = pendingCount;
+      document.getElementById('badge-pass-count').textContent = pendingCount;
+
+      const unclaimedCount = wardenParcels.filter(p => p.status === 'pending').length;
+      document.getElementById('kpi-unclaimed-parcels').textContent = unclaimedCount;
+      document.getElementById('badge-parcel-count').textContent = unclaimedCount;
+
+      const presentCount = wardenStudents.filter(s => s.status === 'present').length;
+      const pct = Math.round((presentCount / wardenStudents.length) * 100);
+      document.getElementById('kpi-attendance-pct').textContent = `${pct}%`;
+    }
+
+    function switchStaffTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.staff-tab-pane').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.staff-tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.staff-stat-card').forEach(c => c.classList.remove('active-tab-stat'));
+
+      const sec = document.getElementById(`section-${tab}`);
+      if (sec) sec.style.display = 'block';
+
+      const btn = document.getElementById(`tab-btn-${tab}`);
+      if (btn) btn.classList.add('active');
+
+      const card = document.getElementById(`stat-card-${tab}`);
+      if (card) card.classList.add('active-tab-stat');
+    }
+
+    // Pass Approvals logic
+    function setWardenFilter(filter, btn) {
+      passFilter = filter;
+      document.querySelectorAll('#section-passes .filter-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderPasses();
+    }
+
+    document.getElementById('pass-search').addEventListener('input', (e) => {
+      passSearchQuery = e.target.value.toLowerCase().trim();
+      renderPasses();
+    });
+
+    function renderPasses() {
+      const container = document.getElementById('warden-requests-container');
+      let filtered = wardenRequests;
+
+      if (passFilter !== 'all') {
+        filtered = filtered.filter(r => r.status === passFilter);
+      }
+
+      if (passSearchQuery) {
+        filtered = filtered.filter(r =>
+          (r.studentName && r.studentName.toLowerCase().includes(passSearchQuery)) ||
+          (r.registerNumber && r.registerNumber.toLowerCase().includes(passSearchQuery)) ||
+          (r.room && r.room.toLowerCase().includes(passSearchQuery)) ||
+          (r.type && r.type.toLowerCase().includes(passSearchQuery))
+        );
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+            <div class="empty-title">No ${passFilter} requests</div>
+            <div class="empty-subtitle">All student passes in this category have been processed</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map((req, idx) => {
+        const badgeColor = { approved: 'badge-success', pending: 'badge-warning', rejected: 'badge-danger' }[req.status] || 'badge-grey';
+        const isPending = req.status === 'pending';
+
+        return `
+          <div class="warden-pass-card ${req.status}" style="animation: slideUp 0.3s ease forwards;">
+            <div class="warden-card-top">
+              <div class="student-badge-info">
+                <div class="student-avatar-letter">${(req.studentName || 'S').charAt(0)}</div>
+                <div>
+                  <div class="student-meta-name">${req.studentName || 'Student'}</div>
+                  <div class="student-meta-sub">
+                    <span>${req.rollNumber || req.registerNumber || 'Roll No'}</span>
+                    <span>•</span>
+                    <span>Room: ${req.room || 'Hostel'}</span>
+                  </div>
+                </div>
+              </div>
+              <span class="badge ${badgeColor}">${req.status.toUpperCase()}</span>
+            </div>
+
+            <div class="warden-pass-grid">
+              <div>
+                <div class="warden-grid-item-lbl">Pass Category</div>
+                <div class="warden-grid-item-val">${req.type}</div>
+              </div>
+              <div>
+                <div class="warden-grid-item-lbl">Destination / Place</div>
+                <div class="warden-grid-item-val">${req.place || 'Local'}</div>
+              </div>
+              <div>
+                <div class="warden-grid-item-lbl">Departure Time</div>
+                <div class="warden-grid-item-val">${req.fromDate} ${req.fromTime}</div>
+              </div>
+              <div>
+                <div class="warden-grid-item-lbl">Expected Return</div>
+                <div class="warden-grid-item-val">${req.toDate} ${req.toTime}</div>
+              </div>
+            </div>
+
+            <div style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:8px">
+              <strong>Reason:</strong> ${req.reason}
+            </div>
+
+            ${req.rejectionReason ? `
+              <div style="background:#FEE2E2;color:#991B1B;padding:8px 12px;border-radius:var(--radius-sm);font-size:0.8rem;margin-top:6px">
+                ✕ Rejection note: ${req.rejectionReason}
+              </div>
+            ` : ''}
+
+            ${isPending ? `
+              <div class="warden-card-actions">
+                <button class="btn btn-success" style="flex:1" onclick="approveRequest('${req.id}')">
+                  ✓ Approve Pass
+                </button>
+                <button class="btn btn-danger" style="flex:1" onclick="openRejectModal('${req.id}')">
+                  ✕ Reject
+                </button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function approveRequest(id) {
+      const idx = wardenRequests.findIndex(r => r.id === id);
+      if (idx === -1) return;
+
+      wardenRequests[idx].status = 'approved';
+      wardenRequests[idx].approvalSteps = [true, true, true];
+      localStorage.setItem('mei_shared_requests', JSON.stringify(wardenRequests));
+
+      updateKPIs();
+      renderPasses();
+      Toast.success('Pass approved successfully! Student notified.');
+    }
+
+    function openRejectModal(id) {
+      targetRejectReqId = id;
+      document.getElementById('reject-reason-text').value = '';
+      Modal.open('reject-modal');
+    }
+
+    function setRejectReason(text) {
+      document.getElementById('reject-reason-text').value = text;
+    }
+
+    document.getElementById('confirm-reject-btn').addEventListener('click', () => {
+      const reason = document.getElementById('reject-reason-text').value.trim();
+      if (!reason) {
+        Toast.error('Please enter a rejection reason');
+        return;
+      }
+
+      const idx = wardenRequests.findIndex(r => r.id === targetRejectReqId);
+      if (idx !== -1) {
+        wardenRequests[idx].status = 'rejected';
+        wardenRequests[idx].rejectionReason = reason;
+        localStorage.setItem('mei_shared_requests', JSON.stringify(wardenRequests));
+        updateKPIs();
+        renderPasses();
+        Modal.close('reject-modal');
+        Toast.warning('Pass request rejected.');
+      }
+    });
+
+    // Parcels Logic
+    function renderParcels() {
+      const container = document.getElementById('warden-parcels-container');
+      container.innerHTML = wardenParcels.map(p => {
+        const isCollected = p.status === 'collected';
+        return `
+          <div class="glass-card" style="padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span class="badge ${isCollected ? 'badge-success' : 'badge-warning'}">${isCollected ? 'COLLECTED' : 'UNCLAIMED'}</span>
+                <span style="font-family:'Nunito';font-weight:900;font-size:0.95rem">${p.id}</span>
+              </div>
+              <div style="font-size:0.85rem;color:var(--text-primary);font-weight:700;margin-top:4px">${p.studentName} (${p.rollNumber || p.registerNumber})</div>
+              <div style="font-size:0.78rem;color:var(--text-secondary)">Carrier: ${p.carrier || 'Courier'} • ${p.description}</div>
+            </div>
+
+            <div>
+              ${!isCollected ? `
+                <button class="btn btn-success btn-sm" onclick="markParcelHandedOver('${p.id}')">
+                  Mark Handed Over
+                </button>
+              ` : `
+                <span style="color:#15803D;font-size:0.8rem;font-weight:800">✓ Handed Over</span>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function markParcelHandedOver(id) {
+      const p = wardenParcels.find(x => x.id === id);
+      if (p) {
+        p.status = 'collected';
+        localStorage.setItem('mei_shared_parcels', JSON.stringify(wardenParcels));
+        updateKPIs();
+        renderParcels();
+        Toast.success(`Parcel ${id} handed over to student.`);
+      }
+    }
+
+    function openLogParcelModal() {
+      document.getElementById('log-parcel-form').reset();
+      document.getElementById('parcel-input-id').value = `P-2026-00${wardenParcels.length + 1}`;
+      Modal.open('log-parcel-modal');
+    }
+
+    document.getElementById('log-parcel-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const newP = {
+        id: document.getElementById('parcel-input-id').value.trim(),
+        studentName: document.getElementById('parcel-input-name').value.trim() || 'Student',
+        registerNumber: document.getElementById('parcel-input-reg').value.trim(),
+        carrier: document.getElementById('parcel-input-carrier').value.trim() || 'Courier',
+        description: document.getElementById('parcel-input-desc').value.trim() || 'Parcel Delivery',
+        arrivalDate: DateUtil.today(),
+        status: 'pending'
+      };
+
+      wardenParcels.unshift(newP);
+      localStorage.setItem('mei_shared_parcels', JSON.stringify(wardenParcels));
+      updateKPIs();
+      renderParcels();
+      Modal.close('log-parcel-modal');
+      Toast.success('Parcel logged into hostel registry!');
+    });
+
+    // Attendance Roll Call
+    function renderAttendance() {
+      const container = document.getElementById('warden-attendance-container');
+      container.innerHTML = wardenStudents.map((stu, i) => `
+        <div class="roll-item">
+          <div>
+            <div style="font-family:'Nunito';font-weight:800;font-size:0.92rem;color:var(--text-primary)">${stu.name}</div>
+            <div style="font-size:0.78rem;color:var(--text-secondary)">${stu.regNo} • Room ${stu.room} (${stu.dept})</div>
+          </div>
+          <div class="roll-status-btns">
+            <button class="roll-btn present ${stu.status === 'present' ? 'active' : ''}" onclick="setStudentRoll(${i}, 'present')">P</button>
+            <button class="roll-btn absent ${stu.status === 'absent' ? 'active' : ''}" onclick="setStudentRoll(${i}, 'absent')">A</button>
+            <button class="roll-btn pass ${stu.status === 'pass' ? 'active' : ''}" onclick="setStudentRoll(${i}, 'pass')">Pass</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function setStudentRoll(idx, status) {
+      wardenStudents[idx].status = status;
+      renderAttendance();
+      updateKPIs();
+    }
+
+    function markAllPresent() {
+      wardenStudents.forEach(s => s.status = 'present');
+      renderAttendance();
+      updateKPIs();
+      Toast.info('All students marked Present');
+    }
+
+    function saveRollCall() {
+      Toast.success('Roll call saved successfully! Database synced.');
+    }
+
+    // Emergency feed
+    function renderEmergency() {
+      const container = document.getElementById('warden-emergency-container');
+      container.innerHTML = `
+        <div class="glass-card" style="padding:16px;border-left:5px solid #EF4444;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span class="badge badge-danger">RESOLVED</span>
+            <span style="font-size:0.75rem;color:var(--text-secondary)">Yesterday 11:20 PM</span>
+          </div>
+          <div style="margin-top:6px;font-family:'Nunito';font-weight:900;color:var(--text-primary)">
+            Medical Assistance • Room A403
+          </div>
+          <div style="font-size:0.82rem;color:var(--text-secondary);margin-top:2px">
+            Student: Kaviraj S • First aid administered by warden on duty.
+          </div>
+        </div>
+      `;
+    }
+
+    function switchToStudent() {
+      sessionStorage.setItem('mei_demo_user', JSON.stringify(DEMO_USER));
+      window.location.href = 'dashboard.html';
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      Confirm.show({
+        title: 'Logout',
+        message: 'Sign out from Warden Portal?',
+        icon: 'warning',
+        confirmText: 'Logout',
+        danger: true,
+        onConfirm: () => {
+          sessionStorage.removeItem('mei_demo_user');
+          window.location.href = 'login.html';
+        }
+      });
+    });
+
+    document.addEventListener('DOMContentLoaded', initData);
+  </script>
+</body>
+</html>

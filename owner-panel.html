@@ -1,0 +1,1423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1b63c2">
+  <meta name="description" content="Mahendra Hostel - Owner Management Portal">
+  <title>Owner Portal – Mahendra Hostel</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <style>
+    :root {
+      --owner-primary: #1b63c2;
+      --owner-secondary: #3e1e82;
+      --owner-accent: #6366f1;
+      --bg-page: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      font-family: 'Nunito', 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: var(--text-main);
+    }
+
+    /* Header matching app style */
+    .owner-header {
+      background: linear-gradient(90deg, #1b63c2 0%, #3e1e82 100%) !important;
+      padding: calc(var(--safe-top, 0px) + 14px) 20px 16px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      box-shadow: 0 4px 16px rgba(30, 20, 100, 0.22) !important;
+      color: #ffffff;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .owner-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .owner-header-logo {
+      width: 36px;
+      height: 36px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+    }
+
+    .owner-header-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .owner-header-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin: 0;
+      letter-spacing: 0.3px;
+    }
+
+    .owner-header-subtitle {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 600;
+    }
+
+    .owner-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-header-logout {
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-header-logout:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    /* Container */
+    .owner-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px 16px 60px;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    @media (min-width: 768px) {
+      .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+      }
+    }
+
+    .stat-card {
+      background: #ffffff;
+      border-radius: var(--radius-md);
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+    }
+
+    .stat-card.students::before { background: linear-gradient(90deg, #10b981, #059669); }
+    .stat-card.admins::before { background: linear-gradient(90deg, #3b82f6, #1d4ed8); }
+    .stat-card.owners::before { background: linear-gradient(90deg, #8b5cf6, #6d28d9); }
+    .stat-card.active-passes::before { background: linear-gradient(90deg, #f59e0b, #d97706); }
+
+    .stat-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--text-main);
+      line-height: 1;
+    }
+
+    /* Navigation Tabs */
+    .owner-tabs {
+      display: flex;
+      background: #ffffff;
+      padding: 6px;
+      border-radius: var(--radius-md);
+      gap: 6px;
+      margin-bottom: 22px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      border: 1px solid var(--border-color);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .owner-tabs::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      flex: 1;
+      min-width: 130px;
+      padding: 11px 16px;
+      border: none;
+      background: transparent;
+      border-radius: var(--radius-sm);
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, #1b63c2 0%, #3e1e82 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(30, 20, 100, 0.22);
+    }
+
+    /* Section panes */
+    .tab-pane {
+      display: none;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Action bar */
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .search-input-wrap {
+      flex: 1;
+      min-width: 240px;
+      position: relative;
+    }
+
+    .search-input-wrap input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 14px 10px 38px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border-color);
+      background: #ffffff;
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-input-wrap input:focus {
+      border-color: var(--owner-primary);
+    }
+
+    .search-input-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      stroke: var(--text-muted);
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .filter-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .filter-pill {
+      border: 1px solid var(--border-color);
+      background: #ffffff;
+      color: var(--text-muted);
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .filter-pill.active {
+      background: #1b63c2;
+      color: #ffffff;
+      border-color: #1b63c2;
+    }
+
+    .btn-create-user {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border: none;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 3px 10px rgba(16, 185, 129, 0.28);
+      transition: all 0.2s ease;
+    }
+
+    .btn-create-user:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 5px 14px rgba(16, 185, 129, 0.35);
+    }
+
+    /* User Cards / List */
+    .user-cards-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 768px) {
+      .user-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .user-cards-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .user-card {
+      background: #ffffff;
+      border-radius: var(--radius-md);
+      padding: 18px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+
+    .user-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    .user-card.disabled {
+      opacity: 0.65;
+      background: #f1f5f9;
+    }
+
+    .user-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .user-main-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .user-name {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text-main);
+    }
+
+    .user-username {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .badge-group {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-owner { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
+    .badge-admin { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .badge-student { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+    .badge-master { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .badge-active { background: #ecfdf5; color: #047857; }
+    .badge-disabled { background: #fee2e2; color: #b91c1c; }
+
+    .user-details-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 0.84rem;
+      color: #334155;
+      padding: 8px 0;
+      border-top: 1px dashed var(--border-color);
+      border-bottom: 1px dashed var(--border-color);
+    }
+
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .detail-label {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .detail-value {
+      font-weight: 700;
+    }
+
+    .user-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+      padding-top: 4px;
+    }
+
+    .btn-action {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      color: #334155;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-action:hover {
+      background: #e2e8f0;
+    }
+
+    .btn-action.edit:hover { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+    .btn-action.toggle:hover { background: #fefce8; color: #854d0e; border-color: #fef08a; }
+    .btn-action.delete:hover { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+
+    /* Modals */
+    .owner-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .owner-modal.show {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+      box-sizing: border-box;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin: 0;
+    }
+
+    .modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    @media (min-width: 500px) {
+      .form-grid.two-col {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #334155;
+    }
+
+    .form-control {
+      padding: 10px 14px;
+      border: 1.5px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      font-family: 'Nunito', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+      outline: none;
+      background: #fafafa;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    .form-control:focus {
+      border-color: var(--owner-primary);
+      background: #ffffff;
+    }
+
+    .role-selector {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .role-option {
+      flex: 1;
+      padding: 10px;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      text-align: center;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 0.85rem;
+      transition: all 0.15s ease;
+    }
+
+    .role-option.selected {
+      border-color: var(--owner-primary);
+      background: rgba(27, 99, 194, 0.08);
+      color: var(--owner-primary);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    /* Activity Logs Table */
+    .logs-table-wrap {
+      background: #ffffff;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      overflow-x: auto;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    }
+
+    .logs-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+
+    .logs-table th {
+      background: #f8fafc;
+      padding: 12px 16px;
+      font-weight: 800;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+    }
+
+    .logs-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+      vertical-align: top;
+    }
+
+    .logs-table tr:hover {
+      background: #f8fafc;
+    }
+
+    .log-time {
+      font-family: monospace;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+  <div id="confirm-dialog" class="confirm-dialog"></div>
+
+  <!-- Header -->
+  <header class="owner-header">
+    <div class="owner-header-left">
+      <div class="owner-header-logo">
+        <img src="assets/icons/mei-logo.png" alt="MEI Logo">
+      </div>
+      <div>
+        <h1 class="owner-header-title">Master Owner Control</h1>
+        <div class="owner-header-subtitle" id="owner-name-display">Logged in as Master Owner</div>
+      </div>
+    </div>
+    <div class="owner-header-actions">
+      <button class="btn-header-logout" onclick="handleOwnerLogout()">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        <span>Logout</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Container -->
+  <div class="owner-container">
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card students">
+        <span class="stat-title">Total Students</span>
+        <span class="stat-value" id="stat-students-count">0</span>
+      </div>
+      <div class="stat-card admins">
+        <span class="stat-title">Hostel Admins</span>
+        <span class="stat-value" id="stat-admins-count">0</span>
+      </div>
+      <div class="stat-card owners">
+        <span class="stat-title">Owners</span>
+        <span class="stat-value" id="stat-owners-count">1</span>
+      </div>
+      <div class="stat-card active-passes">
+        <span class="stat-title">Total Accounts</span>
+        <span class="stat-value" id="stat-total-count">1</span>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="owner-tabs">
+      <button class="tab-btn active" id="tab-btn-users" onclick="switchOwnerTab('users')">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        <span>User Accounts</span>
+      </button>
+
+      <button class="tab-btn" id="tab-btn-create" onclick="openCreateUserModal()">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="16"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        <span>+ Add User</span>
+      </button>
+
+      <button class="tab-btn" id="tab-btn-logs" onclick="switchOwnerTab('logs')">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+          <polyline points="10 9 9 9 8 9"/>
+        </svg>
+        <span>Activity Logs</span>
+      </button>
+
+      <button class="tab-btn" id="tab-btn-admin-portal" onclick="window.location.href='admin-panel.html'">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        <span>Admin Panel &rarr;</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: USERS LIST -->
+    <div id="pane-users" class="tab-pane active">
+      <div class="action-bar">
+        <div class="search-input-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="user-search-input" placeholder="Search by name, username, reg no, room..." oninput="handleUserSearch()">
+        </div>
+
+        <div class="filter-pills">
+          <button class="filter-pill active" onclick="setUserRoleFilter('all', this)">All</button>
+          <button class="filter-pill" onclick="setUserRoleFilter('student', this)">Students</button>
+          <button class="filter-pill" onclick="setUserRoleFilter('admin', this)">Admins</button>
+          <button class="filter-pill" onclick="setUserRoleFilter('owner', this)">Owners</button>
+        </div>
+
+        <button class="btn-create-user" onclick="openCreateUserModal()">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>Create New User</span>
+        </button>
+      </div>
+
+      <div id="users-cards-container" class="user-cards-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- TAB 2: ACTIVITY LOGS -->
+    <div id="pane-logs" class="tab-pane">
+      <div class="action-bar">
+        <div class="search-input-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="logs-search-input" placeholder="Search action, performer or description..." oninput="handleLogsSearch()">
+        </div>
+        <button class="btn btn-secondary" onclick="handleClearLogs()">Clear Logs</button>
+      </div>
+
+      <div class="logs-table-wrap">
+        <table class="logs-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Action</th>
+              <th>Performer</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody id="logs-table-body">
+            <!-- Rendered dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE USER MODAL -->
+  <div id="modal-create-user" class="owner-modal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 class="modal-title">Create New Account</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-create-user')">&times;</button>
+      </div>
+
+      <form id="create-user-form" onsubmit="handleCreateUserSubmit(event)">
+        <!-- Role selector -->
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label">Select Account Role *</label>
+          <div class="role-selector">
+            <div class="role-option selected" id="opt-student" onclick="selectRole('student')">Student</div>
+            <div class="role-option" id="opt-admin" onclick="selectRole('admin')">Admin / Staff</div>
+            <div class="role-option" id="opt-owner" onclick="selectRole('owner')">Owner</div>
+          </div>
+          <input type="hidden" id="input-role" value="student">
+        </div>
+
+        <div class="form-grid two-col">
+          <!-- Full Name -->
+          <div class="form-group full-width">
+            <label class="form-label">Full Name *</label>
+            <input type="text" id="input-name" class="form-control" placeholder="e.g. ARUN KUMAR" required>
+          </div>
+
+          <!-- Username -->
+          <div class="form-group">
+            <label class="form-label">Username *</label>
+            <input type="text" id="input-username" class="form-control" placeholder="e.g. 125UCS080 or arunk" required autocomplete="off">
+          </div>
+
+          <!-- Password -->
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <input type="password" id="input-password" class="form-control" placeholder="Minimum 6 characters" required minlength="6" autocomplete="new-password">
+          </div>
+
+          <!-- Student-specific fields -->
+          <div class="form-group student-field">
+            <label class="form-label">Roll Number</label>
+            <input type="text" id="input-regno" class="form-control" placeholder="e.g. 125UCS080">
+          </div>
+
+          <div class="form-group student-field">
+            <label class="form-label">Room Number *</label>
+            <input type="text" id="input-room" class="form-control" placeholder="e.g. A404" required>
+          </div>
+
+          <div class="form-group student-field">
+            <label class="form-label">Department *</label>
+            <input type="text" id="input-dept" class="form-control" placeholder="e.g. BE (CSE)" required>
+          </div>
+
+          <div class="form-group student-field">
+            <label class="form-label">Year of Study</label>
+            <select id="input-year" class="form-control">
+              <option value="1st Year">1st Year</option>
+              <option value="2nd Year">2nd Year</option>
+              <option value="3rd Year" selected>3rd Year</option>
+              <option value="4th Year">4th Year</option>
+            </select>
+          </div>
+
+          <div class="form-group student-field">
+            <label class="form-label">Hostel</label>
+            <select id="input-hostel" class="form-control">
+              <option value="Boys Hostel">Boys Hostel</option>
+              <option value="Girls Hostel">Girls Hostel</option>
+            </select>
+          </div>
+
+          <!-- Contact Fields -->
+          <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <input type="tel" id="input-phone" class="form-control" placeholder="e.g. 9876543210">
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Email Address</label>
+            <input type="email" id="input-email" class="form-control" placeholder="e.g. student@mei.edu">
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-create-user')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-submit-create">Create Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT USER MODAL -->
+  <div id="modal-edit-user" class="owner-modal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 class="modal-title">Edit Account</h3>
+        <button class="modal-close-btn" onclick="closeModal('modal-edit-user')">&times;</button>
+      </div>
+
+      <form id="edit-user-form" onsubmit="handleEditUserSubmit(event)">
+        <input type="hidden" id="edit-uid">
+
+        <div class="form-grid two-col">
+          <div class="form-group full-width">
+            <label class="form-label">Full Name *</label>
+            <input type="text" id="edit-name" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <input type="text" id="edit-username" class="form-control" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="tel" id="edit-phone" class="form-control">
+          </div>
+
+          <!-- Password Reset (Optional) -->
+          <div class="form-group full-width">
+            <label class="form-label">New Password (leave empty to keep current)</label>
+            <input type="password" id="edit-password" class="form-control" placeholder="Enter new password">
+          </div>
+
+          <!-- Dynamic fields for student -->
+          <div class="form-group edit-student-field">
+            <label class="form-label">Roll Number</label>
+            <input type="text" id="edit-regno" class="form-control">
+          </div>
+
+          <div class="form-group edit-student-field">
+            <label class="form-label">Room Number *</label>
+            <input type="text" id="edit-room" class="form-control" required>
+          </div>
+
+          <div class="form-group edit-student-field">
+            <label class="form-label">Department *</label>
+            <input type="text" id="edit-dept" class="form-control" required>
+          </div>
+
+          <div class="form-group edit-student-field">
+            <label class="form-label">Year</label>
+            <select id="edit-year" class="form-control">
+              <option value="1st Year">1st Year</option>
+              <option value="2nd Year">2nd Year</option>
+              <option value="3rd Year">3rd Year</option>
+              <option value="4th Year">4th Year</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-edit-user')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase & App Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="js/firebase.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+
+  <script>
+    initFirebase();
+    if (typeof seedMasterOwner === 'function') {
+      seedMasterOwner();
+    }
+
+    // Role Guard: strictly 'owner'
+    const currentOwner = requireRole('owner');
+    if (currentOwner) {
+      document.getElementById('owner-name-display').textContent = `${currentOwner.name} (${currentOwner.username})`;
+    }
+
+    let activeFilter = 'all';
+    let searchQuery = '';
+    let currentTab = 'users';
+
+    // Tabs switching
+    function switchOwnerTab(tabName) {
+      currentTab = tabName;
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+
+      const btn = document.getElementById(`tab-btn-${tabName}`);
+      const pane = document.getElementById(`pane-${tabName}`);
+      if (btn) btn.classList.add('active');
+      if (pane) pane.classList.add('active');
+
+      if (tabName === 'logs') {
+        renderLogs();
+      } else if (tabName === 'users') {
+        renderUsers();
+      }
+    }
+
+    // Role selector in Create User
+    function selectRole(role) {
+      document.getElementById('input-role').value = role;
+      document.querySelectorAll('.role-option').forEach(o => o.classList.remove('selected'));
+      document.getElementById(`opt-${role}`).classList.add('selected');
+
+      const isStudent = role === 'student';
+      document.querySelectorAll('.student-field').forEach(f => {
+        f.style.display = isStudent ? 'flex' : 'none';
+      });
+
+      const roomInput = document.getElementById('input-room');
+      const deptInput = document.getElementById('input-dept');
+      const regnoInput = document.getElementById('input-regno');
+      if (roomInput) roomInput.required = isStudent;
+      if (deptInput) deptInput.required = isStudent;
+      if (regnoInput) regnoInput.required = false;
+    }
+
+    // Filter by role
+    function setUserRoleFilter(role, btn) {
+      activeFilter = role;
+      document.querySelectorAll('.filter-pill').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderUsers();
+    }
+
+    function handleUserSearch() {
+      searchQuery = document.getElementById('user-search-input').value.toLowerCase().trim();
+      renderUsers();
+    }
+
+    function handleLogsSearch() {
+      const q = document.getElementById('logs-search-input').value.toLowerCase().trim();
+      renderLogs(q);
+    }
+
+    // Render Users
+    function renderUsers() {
+      const allUsers = getAllUsers();
+      
+      // Update Stats
+      const students = allUsers.filter(u => u.role === 'student');
+      const admins = allUsers.filter(u => u.role === 'admin');
+      const owners = allUsers.filter(u => u.role === 'owner');
+
+      document.getElementById('stat-students-count').textContent = students.length;
+      document.getElementById('stat-admins-count').textContent = admins.length;
+      document.getElementById('stat-owners-count').textContent = owners.length;
+      document.getElementById('stat-total-count').textContent = allUsers.length;
+
+      // Filter
+      let filtered = allUsers;
+      if (activeFilter !== 'all') {
+        filtered = filtered.filter(u => u.role === activeFilter);
+      }
+
+      if (searchQuery) {
+        filtered = filtered.filter(u => 
+          (u.name && u.name.toLowerCase().includes(searchQuery)) ||
+          (u.username && u.username.toLowerCase().includes(searchQuery)) ||
+          (u.registerNumber && u.registerNumber.toLowerCase().includes(searchQuery)) ||
+          (u.rollNumber && u.rollNumber.toLowerCase().includes(searchQuery)) ||
+          (u.room && u.room.toLowerCase().includes(searchQuery)) ||
+          (u.phone && u.phone.includes(searchQuery))
+        );
+      }
+
+      const container = document.getElementById('users-cards-container');
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column:1/-1;text-align:center;padding:48px 20px;color:var(--text-muted);background:#fff;border-radius:var(--radius-md);border:1px solid var(--border-color);">
+            <div style="font-size:2rem;margin-bottom:8px">👥</div>
+            <div style="font-weight:700">No user accounts found matching your filter.</div>
+            <button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="openCreateUserModal()">+ Add New User</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(u => {
+        const isMaster = u.isMaster;
+        const isDisabled = u.status === 'disabled';
+        const roleBadge = u.role === 'owner' ? 'badge-owner' : (u.role === 'admin' ? 'badge-admin' : 'badge-student');
+        const statusBadge = isDisabled ? 'badge-disabled' : 'badge-active';
+
+        return `
+          <div class="user-card ${isDisabled ? 'disabled' : ''}" id="card-${u.uid}">
+            <div class="user-card-header">
+              <div class="user-main-info">
+                <div class="user-name">${u.name}</div>
+                <div class="user-username">@${u.username}</div>
+              </div>
+              <div class="badge-group">
+                ${isMaster ? '<span class="badge badge-master">MASTER</span>' : ''}
+                <span class="badge ${roleBadge}">${u.role}</span>
+                <span class="badge ${statusBadge}">${isDisabled ? 'DISABLED' : 'ACTIVE'}</span>
+              </div>
+            </div>
+
+            <div class="user-details-list">
+              ${(u.rollNumber || u.registerNumber) ? `
+                <div class="detail-item">
+                  <span class="detail-label">Roll No:</span>
+                  <span class="detail-value">${u.rollNumber || u.registerNumber}</span>
+                </div>
+              ` : ''}
+              ${u.room ? `
+                <div class="detail-item">
+                  <span class="detail-label">Room:</span>
+                  <span class="detail-value">${u.room}</span>
+                </div>
+              ` : ''}
+              ${u.department ? `
+                <div class="detail-item">
+                  <span class="detail-label">Dept:</span>
+                  <span class="detail-value">${u.department}</span>
+                </div>
+              ` : ''}
+              ${u.phone ? `
+                <div class="detail-item">
+                  <span class="detail-label">Phone:</span>
+                  <span class="detail-value">${u.phone}</span>
+                </div>
+              ` : ''}
+            </div>
+
+            <div class="user-actions">
+              <button class="btn-action edit" onclick="openEditUserModal('${u.uid}')">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                <span>Edit</span>
+              </button>
+
+              ${!isMaster ? `
+                <button class="btn-action toggle" onclick="handleToggleStatus('${u.uid}')">
+                  <span>${isDisabled ? 'Enable' : 'Disable'}</span>
+                </button>
+                <button class="btn-action delete" onclick="handleDeleteUser('${u.uid}')">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  <span>Delete</span>
+                </button>
+              ` : '<span style="font-size:0.75rem;font-weight:700;color:var(--text-muted);padding:4px 8px;">Protected Account</span>'}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Create User Submit
+    function handleCreateUserSubmit(e) {
+      e.preventDefault();
+      const role = document.getElementById('input-role').value;
+      const name = document.getElementById('input-name').value.trim();
+      const username = document.getElementById('input-username').value.trim();
+      const password = document.getElementById('input-password').value;
+      const phone = document.getElementById('input-phone').value.trim();
+      const email = document.getElementById('input-email').value.trim();
+
+      const userData = {
+        role,
+        name,
+        username,
+        password,
+        phone,
+        email
+      };
+
+      if (role === 'student') {
+        const room = document.getElementById('input-room').value.trim();
+        const dept = document.getElementById('input-dept').value.trim();
+
+        if (!room) {
+          Toast.error('Room Number is required for students');
+          document.getElementById('input-room').focus();
+          return;
+        }
+        if (!dept) {
+          Toast.error('Department is required for students');
+          document.getElementById('input-dept').focus();
+          return;
+        }
+
+        const rollNum = document.getElementById('input-regno').value.trim();
+        userData.registerNumber = rollNum;
+        userData.rollNumber = rollNum;
+        userData.room = room;
+        userData.department = dept;
+        userData.year = document.getElementById('input-year').value;
+        userData.hostel = document.getElementById('input-hostel').value;
+      }
+
+      const res = createUser(userData, currentOwner.uid);
+      console.log('handleCreateUserSubmit res:', res);
+      if (res.success) {
+        Toast.success(`Created ${role}: ${name}!`);
+        closeModal('modal-create-user');
+        document.getElementById('create-user-form').reset();
+        selectRole('student');
+        renderUsers();
+      } else {
+        Toast.error(res.message);
+      }
+    }
+
+    // Edit User Modal
+    function openEditUserModal(uid) {
+      const u = getUserByUID(uid);
+      if (!u) return;
+
+      document.getElementById('edit-uid').value = uid;
+      document.getElementById('edit-name').value = u.name || '';
+      document.getElementById('edit-username').value = u.username || '';
+      document.getElementById('edit-phone').value = u.phone || '';
+      document.getElementById('edit-password').value = '';
+
+      const isStudent = u.role === 'student';
+      document.querySelectorAll('.edit-student-field').forEach(f => {
+        f.style.display = isStudent ? 'flex' : 'none';
+      });
+
+      const editRoom = document.getElementById('edit-room');
+      const editDept = document.getElementById('edit-dept');
+      const editRegno = document.getElementById('edit-regno');
+      if (editRoom) editRoom.required = isStudent;
+      if (editDept) editDept.required = isStudent;
+      if (editRegno) editRegno.required = false;
+
+      if (isStudent) {
+        document.getElementById('edit-regno').value = u.rollNumber || u.registerNumber || '';
+        document.getElementById('edit-room').value = u.room || '';
+        document.getElementById('edit-dept').value = u.department || '';
+        document.getElementById('edit-year').value = u.year || '3rd Year';
+      }
+
+      openModal('modal-edit-user');
+    }
+
+    function handleEditUserSubmit(e) {
+      e.preventDefault();
+      const uid = document.getElementById('edit-uid').value;
+      const name = document.getElementById('edit-name').value.trim();
+      const username = document.getElementById('edit-username').value.trim();
+      const phone = document.getElementById('edit-phone').value.trim();
+      const newPassword = document.getElementById('edit-password').value;
+
+      const updates = { name, username, phone };
+      if (newPassword) updates.password = newPassword;
+
+      const user = getUserByUID(uid);
+      if (user && user.role === 'student') {
+        const room = document.getElementById('edit-room').value.trim();
+        const dept = document.getElementById('edit-dept').value.trim();
+
+        if (!room) {
+          Toast.error('Room Number is required for students');
+          document.getElementById('edit-room').focus();
+          return;
+        }
+        if (!dept) {
+          Toast.error('Department is required for students');
+          document.getElementById('edit-dept').focus();
+          return;
+        }
+
+        const rollNum = document.getElementById('edit-regno').value.trim();
+        updates.registerNumber = rollNum;
+        updates.rollNumber = rollNum;
+        updates.room = room;
+        updates.department = dept;
+        updates.year = document.getElementById('edit-year').value;
+      }
+
+      const res = updateUser(uid, updates, currentOwner.uid);
+      if (res.success) {
+        Toast.success('Account updated successfully!');
+        closeModal('modal-edit-user');
+        renderUsers();
+      } else {
+        Toast.error(res.message);
+      }
+    }
+
+    // Toggle Status
+    function handleToggleStatus(uid) {
+      const u = getUserByUID(uid);
+      if (!u) return;
+
+      const actionText = u.status === 'active' ? 'disable' : 'enable';
+      Confirm.show({
+        title: `${actionText.toUpperCase()} Account`,
+        message: `Are you sure you want to ${actionText} ${u.name}'s account?`,
+        icon: 'warning',
+        confirmText: `Yes, ${actionText}`,
+        cancelText: 'Cancel',
+        danger: u.status === 'active',
+        onConfirm: () => {
+          const res = toggleUserStatus(uid, currentOwner.uid);
+          if (res.success) {
+            Toast.success(res.message);
+            renderUsers();
+          } else {
+            Toast.error(res.message);
+          }
+        }
+      });
+    }
+
+    // Delete User
+    function handleDeleteUser(uid) {
+      const u = getUserByUID(uid);
+      if (!u) return;
+
+      Confirm.show({
+        title: 'Delete Account',
+        message: `Are you sure you want to permanently delete ${u.name} (${u.role})? This action cannot be undone.`,
+        icon: 'danger',
+        confirmText: 'Delete Permanently',
+        cancelText: 'Keep Account',
+        danger: true,
+        onConfirm: () => {
+          const res = deleteUser(uid, currentOwner.uid);
+          if (res.success) {
+            Toast.success(res.message);
+            renderUsers();
+          } else {
+            Toast.error(res.message);
+          }
+        }
+      });
+    }
+
+    // Render Activity Logs
+    function renderLogs(filterText = '') {
+      const logs = getActivityLogs();
+      const tbody = document.getElementById('logs-table-body');
+
+      let filtered = logs;
+      if (filterText) {
+        filtered = filtered.filter(l => 
+          (l.action && l.action.toLowerCase().includes(filterText)) ||
+          (l.performerName && l.performerName.toLowerCase().includes(filterText)) ||
+          (l.description && l.description.toLowerCase().includes(filterText))
+        );
+      }
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" style="text-align:center;padding:30px;color:var(--text-muted)">
+              No activity logs recorded yet.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(l => {
+        const d = new Date(l.timestamp);
+        const formatted = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' +
+                          d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        return `
+          <tr>
+            <td class="log-time">${formatted}</td>
+            <td><strong style="color:var(--owner-primary)">${l.action}</strong></td>
+            <td>${l.performerName} <span class="badge badge-${l.performerRole || 'student'}">${l.performerRole}</span></td>
+            <td>${l.description}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function handleClearLogs() {
+      Confirm.show({
+        title: 'Clear Logs',
+        message: 'Are you sure you want to clear all administrative activity logs?',
+        icon: 'danger',
+        confirmText: 'Yes, Clear All',
+        cancelText: 'Cancel',
+        danger: true,
+        onConfirm: () => {
+          clearActivityLogs(currentOwner.uid);
+          renderLogs();
+          Toast.success('Logs cleared successfully!');
+        }
+      });
+    }
+
+    // Modal helpers
+    function openModal(id) {
+      document.getElementById(id).classList.add('show');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('show');
+    }
+
+    function openCreateUserModal() {
+      selectRole('student');
+      openModal('modal-create-user');
+    }
+
+    function handleOwnerLogout() {
+      Confirm.show({
+        title: 'Logout',
+        message: 'Are you sure you want to log out from Master Owner portal?',
+        icon: 'info',
+        confirmText: 'Logout',
+        cancelText: 'Stay',
+        onConfirm: () => {
+          clearSessionAndRedirect();
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderUsers();
+      Toast.init();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Parcel Scan – Mahendra Hostel</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="assets/icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      background: #000000;
+      overflow: hidden;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    .scanner-container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      background: radial-gradient(circle at 50% 50%, #202022 0%, #0d0d0e 60%, #000000 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: calc(var(--safe-top) + 16px) 16px calc(var(--safe-bottom) + 24px);
+    }
+
+    /* Live Video Feed Background */
+    #qr-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 1;
+      display: none;
+    }
+
+    /* Dark ambient camera noise overlay matching Screenshot 3 */
+    .scanner-noise-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(30,30,30,0.4) 0%, rgba(10,10,10,0.85) 100%);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* Top Bar with Back Button */
+    .scanner-top-bar {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 10;
+    }
+
+    .scanner-back-btn {
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      text-decoration: none;
+      transition: background 0.15s ease;
+    }
+
+    .scanner-back-btn:hover, .scanner-back-btn:active {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .scanner-back-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: #ffffff;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    /* Frosted Square Viewfinder Box matching Screenshot 3 */
+    .viewfinder-box {
+      width: 270px;
+      height: 270px;
+      max-width: 78vw;
+      max-height: 78vw;
+      background: rgba(255, 255, 255, 0.08);
+      position: relative;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
+      cursor: pointer;
+    }
+
+    /* Red Laser Scan Line across horizontal center matching Screenshot 3 */
+    .laser-line {
+      width: 100%;
+      height: 2px;
+      background: #ef4444;
+      box-shadow: 0 0 10px #ef4444, 0 0 18px rgba(239, 68, 68, 0.6);
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      animation: laserPulse 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes laserPulse {
+      0% {
+        opacity: 0.85;
+        top: 30%;
+      }
+      50% {
+        opacity: 1;
+        top: 50%;
+      }
+      100% {
+        opacity: 0.85;
+        top: 70%;
+      }
+    }
+
+    /* Bottom Prompt Text matching Screenshot 3 */
+    .scanner-bottom-label {
+      font-family: 'Fredoka', 'Nunito', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #ffffff;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+      letter-spacing: 0.3px;
+      margin-bottom: 16px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+      user-select: none;
+    }
+
+    /* Success / Result Sheet */
+    .parcel-result-sheet {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-radius: 24px 24px 0 0;
+      padding: 24px 22px 32px;
+      z-index: 100;
+      box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.4);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .parcel-result-sheet.show {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <div id="toast-container"></div>
+
+  <div class="scanner-container">
+    <!-- Camera stream if supported -->
+    <video id="qr-video" autoplay playsinline muted></video>
+
+    <!-- Noise / Ambient Overlay -->
+    <div class="scanner-noise-overlay"></div>
+
+    <!-- Top Bar with Back Button -->
+    <div class="scanner-top-bar">
+      <a href="dashboard.html" class="scanner-back-btn" aria-label="Back to Dashboard">
+        <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      </a>
+    </div>
+
+    <!-- Frosted Square Viewfinder Box matching Screenshot 3 -->
+    <div class="viewfinder-box" id="scan-trigger" onclick="simulateScan()">
+      <div class="laser-line"></div>
+    </div>
+
+    <!-- Bottom Text matching Screenshot 3 -->
+    <div class="scanner-bottom-label">Scan a QR code</div>
+  </div>
+
+  <!-- Parcel Verified Sheet -->
+  <div class="parcel-result-sheet" id="result-sheet">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div style="font-family:'Fredoka','Nunito';font-size:1.2rem;font-weight:700;color:#111827">Parcel Verified!</div>
+      <button onclick="closeResult()" style="background:none;border:none;cursor:pointer;color:#9ca3af;padding:4px">
+        <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:currentColor;stroke-width:2.5;fill:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px;margin-bottom:18px">
+      <div style="font-size:0.85rem;color:#15803d;font-weight:700;margin-bottom:4px">Tracking ID: MEC-PARCEL-9481</div>
+      <div style="font-size:0.95rem;color:#111827;font-weight:800">Amazon Courier • Electronics</div>
+      <div style="font-size:0.82rem;color:#4b5563;margin-top:4px">Received at Hostel Office: Today, 04:30 PM</div>
+    </div>
+
+    <button onclick="collectParcel()" style="width:100%;background:#231c6b;color:#fff;border:none;border-radius:12px;padding:14px;font-family:'Nunito';font-size:1rem;font-weight:800;cursor:pointer">
+      CONFIRM COLLECTION
+    </button>
+  </div>
+
+  <script src="js/utils.js"></script>
+  <script>
+    // Initialize Camera if device supports it
+    async function startCamera() {
+      const video = document.getElementById('qr-video');
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: 'environment' }
+          });
+          video.srcObject = stream;
+          video.style.display = 'block';
+        } catch(err) {
+          // Camera not available or denied; fallback to dark preview
+          video.style.display = 'none';
+        }
+      }
+    }
+
+    function simulateScan() {
+      const sheet = document.getElementById('result-sheet');
+      sheet.classList.add('show');
+      Toast.show('QR Code Detected!', 'success');
+    }
+
+    function closeResult() {
+      document.getElementById('result-sheet').classList.remove('show');
+    }
+
+    function collectParcel() {
+      closeResult();
+      Toast.show('Parcel collected successfully!', 'success');
+      setTimeout(() => {
+        window.location.href = 'dashboard.html';
+      }, 1000);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      startCamera();
+    });
+  </script>
+</body>
+</html>
