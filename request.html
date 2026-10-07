@@ -800,25 +800,25 @@
           <svg style="width:20px;height:20px;color:#6b7280;pointer-events:none;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
 
-        <!-- Row 1: From | Time Out -->
-        <div class="form-dt-row">
-          <div class="form-dt-col">
+        <!-- Row 1: From Date & Time Out -->
+        <div class="form-dt-row" id="row-from-dt">
+          <div class="form-dt-col" id="col-from-date" style="cursor:pointer;" title="Tap to select Date & Time">
             <svg class="form-dt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
             </svg>
             <span class="form-dt-divider">|</span>
-            <input type="text" id="modal-from-date" class="form-dt-input" placeholder="From" onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" required>
+            <input type="text" id="modal-from-date" class="form-dt-input" placeholder="From Date" readonly style="cursor:pointer;" required>
           </div>
 
-          <div class="form-dt-col">
+          <div class="form-dt-col" id="col-from-time" style="cursor:pointer;" title="Tap to adjust Time">
             <svg class="form-dt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
             <span class="form-dt-divider">|</span>
-            <input type="text" id="modal-from-time" class="form-dt-input" placeholder="Time Out" onfocus="(this.type='time')" onblur="if(!this.value)this.type='text'" required>
+            <input type="text" id="modal-from-time" class="form-dt-input" placeholder="Time Out" readonly style="cursor:pointer;" required>
           </div>
 
-          <div class="cal-badge-wrap" onclick="document.getElementById('modal-from-date').focus();document.getElementById('modal-from-date').showPicker?.()">
+          <div class="cal-badge-wrap" id="badge-from-date" style="cursor:pointer;" title="Open Calendar & Clock">
             <svg class="cal-badge-icon" viewBox="0 0 36 36">
               <rect x="4" y="6" width="28" height="26" rx="5" fill="#f87171"/>
               <rect x="4" y="14" width="28" height="18" rx="2" fill="#ffffff"/>
@@ -833,25 +833,25 @@
           </div>
         </div>
 
-        <!-- Row 2: To | Time In -->
-        <div class="form-dt-row">
-          <div class="form-dt-col">
+        <!-- Row 2: To Date & Time In -->
+        <div class="form-dt-row" id="row-to-dt">
+          <div class="form-dt-col" id="col-to-date" style="cursor:pointer;" title="Tap to select Date & Time">
             <svg class="form-dt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
             </svg>
             <span class="form-dt-divider">|</span>
-            <input type="text" id="modal-to-date" class="form-dt-input" placeholder="To" onfocus="(this.type='date')" onblur="if(!this.value)this.type='text'" required>
+            <input type="text" id="modal-to-date" class="form-dt-input" placeholder="To Date" readonly style="cursor:pointer;" required>
           </div>
 
-          <div class="form-dt-col">
+          <div class="form-dt-col" id="col-to-time" style="cursor:pointer;" title="Tap to adjust Time">
             <svg class="form-dt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
             </svg>
             <span class="form-dt-divider">|</span>
-            <input type="text" id="modal-to-time" class="form-dt-input" placeholder="Time In" onfocus="(this.type='time')" onblur="if(!this.value)this.type='text'" required>
+            <input type="text" id="modal-to-time" class="form-dt-input" placeholder="Time In" readonly style="cursor:pointer;" required>
           </div>
 
-          <div class="cal-badge-wrap" onclick="document.getElementById('modal-to-date').focus();document.getElementById('modal-to-date').showPicker?.()">
+          <div class="cal-badge-wrap" id="badge-to-date" style="cursor:pointer;" title="Open Calendar & Clock">
             <svg class="cal-badge-icon" viewBox="0 0 36 36">
               <rect x="4" y="6" width="28" height="26" rx="5" fill="#f87171"/>
               <rect x="4" y="14" width="28" height="18" rx="2" fill="#ffffff"/>
@@ -865,18 +865,102 @@
             </svg>
           </div>
         </div>
+
+        <!-- Real-Time Timing Validation Alert Banner -->
+        <div id="req-timing-validation-msg" class="timing-validation-alert" style="display:none;"></div>
 
         <!-- Reason Input -->
         <input type="text" id="modal-reason" class="form-reason-box" placeholder="Enter Reason here" required>
 
         <!-- Submit Button -->
         <div class="btn-submit-wrap">
-          <button type="submit" class="btn-submit-modal">SUBMIT</button>
+          <button type="submit" id="modal-submit-btn" class="btn-submit-modal">SUBMIT</button>
         </div>
       </form>
     </div>
   </div>
 
+  <!-- =====================================================
+       MATERIAL DARK DATETIME PICKER (CALENDAR + CLOCK)
+       ===================================================== -->
+  <div id="datetime-picker-modal" class="dt-modal-backdrop" style="display:none;" role="dialog" aria-modal="true">
+    <div class="dt-picker-card">
+      
+      <!-- STEP 1: CALENDAR DATE PICKER -->
+      <div id="dt-step-date" class="dt-step-view">
+        <div class="dt-header">
+          <div class="dt-header-sub">SELECT DATE</div>
+          <div class="dt-header-title" id="dt-selected-date-label">Wed, Oct 7</div>
+        </div>
+
+        <div class="dt-calendar-body">
+          <div class="dt-month-nav">
+            <button type="button" class="dt-nav-arrow" id="dt-prev-month" aria-label="Previous Month">
+              <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span class="dt-month-label" id="dt-current-month-label">October 2026</span>
+            <button type="button" class="dt-nav-arrow" id="dt-next-month" aria-label="Next Month">
+              <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+
+          <div class="dt-weekdays-grid">
+            <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+          </div>
+
+          <div class="dt-days-grid" id="dt-days-container"></div>
+        </div>
+
+        <div class="dt-footer">
+          <button type="button" class="dt-action-btn dt-btn-cancel" id="dt-date-cancel-btn">CANCEL</button>
+          <button type="button" class="dt-action-btn dt-btn-primary" id="dt-date-next-btn">NEXT</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: CIRCULAR CLOCK TIME PICKER -->
+      <div id="dt-step-time" class="dt-step-view" style="display:none;">
+        <div class="dt-header">
+          <div class="dt-header-sub">SELECT TIME</div>
+          <div class="dt-time-display">
+            <div class="dt-time-digits">
+              <button type="button" class="dt-digit-btn active" id="dt-hour-btn">04</button>
+              <span class="dt-colon">:</span>
+              <button type="button" class="dt-digit-btn" id="dt-minute-btn">30</button>
+            </div>
+            <div class="dt-ampm-switch">
+              <button type="button" class="dt-ampm-btn" id="dt-btn-am">AM</button>
+              <button type="button" class="dt-ampm-btn active" id="dt-btn-pm">PM</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="dt-clock-body">
+          <!-- Outing Rule Hint Badge -->
+          <div id="dt-outing-hint" class="dt-rule-hint" style="display:none;"></div>
+
+          <div class="dt-clock-face" id="dt-clock-face">
+            <div class="dt-clock-center"></div>
+            <div class="dt-clock-hand" id="dt-clock-hand">
+              <div class="dt-hand-pin"></div>
+            </div>
+            <div class="dt-numbers-layer" id="dt-numbers-layer"></div>
+          </div>
+        </div>
+
+        <div class="dt-footer">
+          <button type="button" class="dt-action-btn dt-btn-secondary" id="dt-time-back-btn">BACK</button>
+          <button type="button" class="dt-action-btn dt-btn-cancel" id="dt-time-cancel-btn">CANCEL</button>
+          <button type="button" class="dt-action-btn dt-btn-primary" id="dt-time-ok-btn">OK</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="js/firebase.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/auth.js"></script>
@@ -1268,6 +1352,7 @@
 
     function formatTimeDisplay(timeStr) {
       if (!timeStr) return '05:00 PM';
+      if (timeStr.includes('AM') || timeStr.includes('PM')) return timeStr;
       const [h, m] = timeStr.split(':');
       let hour = parseInt(h, 10);
       const ampm = hour >= 12 ? 'PM' : 'AM';
@@ -1277,10 +1362,594 @@
 
     function formatDateDisplay(dateStr) {
       if (!dateStr) return '06-10-2026';
+      if (/^\d{2}-\d{2}-\d{4}$/.test(dateStr)) return dateStr;
       const [y, m, d] = dateStr.split('-');
       return `${d}-${m}-${y}`;
     }
 
+    // =====================================================
+    // MATERIAL DARK DATETIME PICKER CONTROLLER
+    // =====================================================
+    const DateTimePicker = {
+      modal: null,
+      targetField: 'from',
+      currentStep: 'date',
+      viewYear: 2026,
+      viewMonth: 9,
+      selectedDate: null,
+      selectedHour: 5,
+      selectedMinute: 0,
+      selectedPeriod: 'PM',
+      timeMode: 'hour',
+      isDragging: false,
+
+      init() {
+        this.modal = document.getElementById('datetime-picker-modal');
+        if (!this.modal) return;
+
+        document.getElementById('dt-prev-month').addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.prevMonth();
+        });
+        document.getElementById('dt-next-month').addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.nextMonth();
+        });
+
+        document.getElementById('dt-date-cancel-btn').addEventListener('click', () => this.close());
+        document.getElementById('dt-date-next-btn').addEventListener('click', () => this.goToTimeStep());
+
+        document.getElementById('dt-time-back-btn').addEventListener('click', () => this.goToDateStep());
+        document.getElementById('dt-time-cancel-btn').addEventListener('click', () => this.close());
+        document.getElementById('dt-time-ok-btn').addEventListener('click', () => this.confirmSelection());
+
+        document.getElementById('dt-hour-btn').addEventListener('click', () => this.setTimeMode('hour'));
+        document.getElementById('dt-minute-btn').addEventListener('click', () => this.setTimeMode('minute'));
+
+        document.getElementById('dt-btn-am').addEventListener('click', () => this.setPeriod('AM'));
+        document.getElementById('dt-btn-pm').addEventListener('click', () => this.setPeriod('PM'));
+
+        this.modal.addEventListener('click', (e) => {
+          if (e.target === this.modal) this.close();
+        });
+
+        const clockFace = document.getElementById('dt-clock-face');
+        if (clockFace) {
+          const handlePointer = (e, isCommit) => {
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            this.handleClockPointer(clientX, clientY, isCommit);
+          };
+
+          clockFace.addEventListener('mousedown', (e) => {
+            this.isDragging = true;
+            handlePointer(e, false);
+          });
+          window.addEventListener('mousemove', (e) => {
+            if (this.isDragging) handlePointer(e, false);
+          });
+          window.addEventListener('mouseup', (e) => {
+            if (this.isDragging) {
+              this.isDragging = false;
+              handlePointer(e, true);
+            }
+          });
+
+          clockFace.addEventListener('touchstart', (e) => {
+            this.isDragging = true;
+            handlePointer(e, false);
+            e.preventDefault();
+          }, { passive: false });
+          window.addEventListener('touchmove', (e) => {
+            if (this.isDragging) {
+              handlePointer(e, false);
+              e.preventDefault();
+            }
+          }, { passive: false });
+          window.addEventListener('touchend', (e) => {
+            if (this.isDragging) {
+              this.isDragging = false;
+              if (e.changedTouches && e.changedTouches.length) {
+                const clientX = e.changedTouches[0].clientX;
+                const clientY = e.changedTouches[0].clientY;
+                this.handleClockPointer(clientX, clientY, true);
+              }
+            }
+          });
+        }
+
+        this.attachFormTriggers();
+      },
+
+      attachFormTriggers() {
+        const openFromDate = (e) => {
+          e?.preventDefault();
+          e?.stopPropagation();
+          this.open('from', 'date');
+        };
+        document.getElementById('col-from-date')?.addEventListener('click', openFromDate);
+        document.getElementById('modal-from-date')?.addEventListener('click', openFromDate);
+        document.getElementById('badge-from-date')?.addEventListener('click', openFromDate);
+
+        const openFromTime = (e) => {
+          e?.preventDefault();
+          e?.stopPropagation();
+          this.open('from', 'time');
+        };
+        document.getElementById('col-from-time')?.addEventListener('click', openFromTime);
+        document.getElementById('modal-from-time')?.addEventListener('click', openFromTime);
+
+        const openToDate = (e) => {
+          e?.preventDefault();
+          e?.stopPropagation();
+          this.open('to', 'date');
+        };
+        document.getElementById('col-to-date')?.addEventListener('click', openToDate);
+        document.getElementById('modal-to-date')?.addEventListener('click', openToDate);
+        document.getElementById('badge-to-date')?.addEventListener('click', openToDate);
+
+        const openToTime = (e) => {
+          e?.preventDefault();
+          e?.stopPropagation();
+          this.open('to', 'time');
+        };
+        document.getElementById('col-to-time')?.addEventListener('click', openToTime);
+        document.getElementById('modal-to-time')?.addEventListener('click', openToTime);
+
+        // When request type changes, update timing hints
+        document.getElementById('modal-req-type')?.addEventListener('change', () => {
+          const type = document.getElementById('modal-req-type').value;
+          if (type === 'Outing') {
+            const fDate = document.getElementById('modal-from-date')?.value;
+            if (fDate) {
+              document.getElementById('modal-to-date').value = fDate;
+              const parts = fDate.split('-');
+              if (parts.length === 3) {
+                const dObj = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+                const isWk = dObj.getDay() >= 1 && dObj.getDay() <= 5;
+                if (isWk) {
+                  document.getElementById('modal-to-time').value = '07:00 PM';
+                }
+              }
+            }
+          }
+          validateFormTimings();
+        });
+      },
+
+      open(targetField, startStep = 'date') {
+        this.targetField = targetField;
+        const isOuting = document.getElementById('modal-req-type')?.value === 'Outing';
+
+        const existingDateVal = document.getElementById(`modal-${targetField}-date`)?.value;
+        const existingTimeVal = document.getElementById(`modal-${targetField}-time`)?.value;
+
+        let initDate = new Date();
+        if (existingDateVal) {
+          const parts = existingDateVal.split('-');
+          if (parts.length === 3) {
+            initDate = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+          }
+        } else if (targetField === 'to') {
+          const fromVal = document.getElementById('modal-from-date')?.value;
+          if (fromVal) {
+            const parts = fromVal.split('-');
+            if (parts.length === 3) {
+              initDate = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+            }
+          }
+        }
+
+        if (isNaN(initDate.getTime())) initDate = new Date();
+        this.selectedDate = initDate;
+        this.viewYear = initDate.getFullYear();
+        this.viewMonth = initDate.getMonth();
+
+        if (existingTimeVal) {
+          const m = existingTimeVal.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+          if (m) {
+            this.selectedHour = parseInt(m[1], 10);
+            this.selectedMinute = parseInt(m[2], 10);
+            this.selectedPeriod = m[3] ? m[3].toUpperCase() : 'PM';
+          }
+        } else {
+          if (isOuting) {
+            const day = initDate.getDay();
+            const isWk = (day >= 1 && day <= 5);
+            if (targetField === 'from') {
+              if (isWk) {
+                this.selectedHour = 5;
+                this.selectedMinute = 0;
+                this.selectedPeriod = 'PM';
+              } else {
+                this.selectedHour = 9;
+                this.selectedMinute = 30;
+                this.selectedPeriod = 'AM';
+              }
+            } else {
+              if (isWk) {
+                this.selectedHour = 7;
+                this.selectedMinute = 0;
+                this.selectedPeriod = 'PM';
+              } else {
+                this.selectedHour = 4;
+                this.selectedMinute = 0;
+                this.selectedPeriod = 'PM';
+              }
+            }
+          } else {
+            this.selectedHour = 5;
+            this.selectedMinute = 0;
+            this.selectedPeriod = 'PM';
+          }
+        }
+
+        this.modal.style.display = 'flex';
+        if (startStep === 'time') {
+          this.goToTimeStep();
+        } else {
+          this.goToDateStep();
+        }
+      },
+
+      close() {
+        if (this.modal) this.modal.style.display = 'none';
+      },
+
+      goToDateStep() {
+        this.currentStep = 'date';
+        document.getElementById('dt-step-date').style.display = 'block';
+        document.getElementById('dt-step-time').style.display = 'none';
+        this.renderCalendar();
+      },
+
+      goToTimeStep() {
+        this.currentStep = 'time';
+        this.timeMode = 'hour';
+        document.getElementById('dt-step-date').style.display = 'none';
+        document.getElementById('dt-step-time').style.display = 'block';
+        this.updateTimeDisplay();
+        this.updateOutingHint();
+        this.renderClockFace();
+      },
+
+      updateOutingHint() {
+        const hintEl = document.getElementById('dt-outing-hint');
+        const isOuting = document.getElementById('modal-req-type')?.value === 'Outing';
+        if (!hintEl) return;
+
+        if (!isOuting) {
+          hintEl.style.display = 'none';
+          return;
+        }
+
+        const day = this.selectedDate ? this.selectedDate.getDay() : new Date().getDay();
+        const isWeekday = (day >= 1 && day <= 5);
+        hintEl.style.display = 'block';
+        if (isWeekday) {
+          hintEl.innerHTML = `📅 <strong>Weekday Outing:</strong> Departure after 4:30 PM • Return must be <strong>7:00 PM</strong>`;
+        } else {
+          hintEl.innerHTML = `📅 <strong>Weekend Outing:</strong> Morning (9:00 AM–4:00 PM) or Evening (4:00 PM–7:00 PM)`;
+        }
+      },
+
+      prevMonth() {
+        this.viewMonth--;
+        if (this.viewMonth < 0) {
+          this.viewMonth = 11;
+          this.viewYear--;
+        }
+        this.renderCalendar();
+      },
+
+      nextMonth() {
+        this.viewMonth++;
+        if (this.viewMonth > 11) {
+          this.viewMonth = 0;
+          this.viewYear++;
+        }
+        this.renderCalendar();
+      },
+
+      renderCalendar() {
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        document.getElementById('dt-current-month-label').textContent = `${months[this.viewMonth]} ${this.viewYear}`;
+
+        if (this.selectedDate) {
+          const dName = weekdays[this.selectedDate.getDay()];
+          const mShort = months[this.selectedDate.getMonth()].slice(0, 3);
+          document.getElementById('dt-selected-date-label').textContent = `${dName}, ${mShort} ${this.selectedDate.getDate()}`;
+        }
+
+        const container = document.getElementById('dt-days-container');
+        container.innerHTML = '';
+
+        const firstDayIndex = new Date(this.viewYear, this.viewMonth, 1).getDay();
+        const daysInMonth = new Date(this.viewYear, this.viewMonth + 1, 0).getDate();
+        const prevMonthDays = new Date(this.viewYear, this.viewMonth, 0).getDate();
+        const today = new Date();
+
+        // Prev month padding
+        for (let i = firstDayIndex - 1; i >= 0; i--) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'dt-day-btn other-month';
+          btn.textContent = prevMonthDays - i;
+          container.appendChild(btn);
+        }
+
+        // Current month
+        for (let day = 1; day <= daysInMonth; day++) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'dt-day-btn';
+          btn.textContent = day;
+
+          const thisDate = new Date(this.viewYear, this.viewMonth, day);
+          if (today.toDateString() === thisDate.toDateString()) {
+            btn.classList.add('today');
+          }
+
+          if (this.selectedDate &&
+              this.selectedDate.getFullYear() === this.viewYear &&
+              this.selectedDate.getMonth() === this.viewMonth &&
+              this.selectedDate.getDate() === day) {
+            btn.classList.add('selected');
+          }
+
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.selectedDate = new Date(this.viewYear, this.viewMonth, day);
+
+            document.querySelectorAll('.dt-day-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+
+            const dName = weekdays[this.selectedDate.getDay()];
+            const mShort = months[this.selectedDate.getMonth()].slice(0, 3);
+            document.getElementById('dt-selected-date-label').textContent = `${dName}, ${mShort} ${day}`;
+
+            // STEP 2: Smooth automatic transition to Time Picker!
+            setTimeout(() => {
+              this.goToTimeStep();
+            }, 120);
+          });
+
+          container.appendChild(btn);
+        }
+
+        // Next month padding
+        const totalCells = firstDayIndex + daysInMonth;
+        const remaining = (7 - (totalCells % 7)) % 7;
+        for (let i = 1; i <= remaining; i++) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'dt-day-btn other-month';
+          btn.textContent = i;
+          container.appendChild(btn);
+        }
+      },
+
+      setTimeMode(mode) {
+        this.timeMode = mode;
+        document.getElementById('dt-hour-btn').classList.toggle('active', mode === 'hour');
+        document.getElementById('dt-minute-btn').classList.toggle('active', mode === 'minute');
+        this.renderClockFace();
+      },
+
+      setPeriod(p) {
+        this.selectedPeriod = p;
+        document.getElementById('dt-btn-am').classList.toggle('active', p === 'AM');
+        document.getElementById('dt-btn-pm').classList.toggle('active', p === 'PM');
+      },
+
+      updateTimeDisplay() {
+        document.getElementById('dt-hour-btn').textContent = String(this.selectedHour).padStart(2, '0');
+        document.getElementById('dt-minute-btn').textContent = String(this.selectedMinute).padStart(2, '0');
+        document.getElementById('dt-hour-btn').classList.toggle('active', this.timeMode === 'hour');
+        document.getElementById('dt-minute-btn').classList.toggle('active', this.timeMode === 'minute');
+        document.getElementById('dt-btn-am').classList.toggle('active', this.selectedPeriod === 'AM');
+        document.getElementById('dt-btn-pm').classList.toggle('active', this.selectedPeriod === 'PM');
+      },
+
+      renderClockFace() {
+        const numbersLayer = document.getElementById('dt-numbers-layer');
+        const hand = document.getElementById('dt-clock-hand');
+        numbersLayer.innerHTML = '';
+
+        const radius = 80;
+        const cx = 110;
+        const cy = 110;
+
+        if (this.timeMode === 'hour') {
+          const items = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+          items.forEach((num, index) => {
+            const angleDeg = index * 30;
+            const rad = (angleDeg - 90) * Math.PI / 180;
+            const x = cx + radius * Math.cos(rad);
+            const y = cy + radius * Math.sin(rad);
+
+            const el = document.createElement('div');
+            el.className = 'dt-clock-num' + (this.selectedHour === num ? ' selected' : '');
+            el.style.left = `${x}px`;
+            el.style.top = `${y}px`;
+            el.textContent = num;
+            numbersLayer.appendChild(el);
+          });
+
+          const handAngle = (this.selectedHour % 12) * 30;
+          hand.style.transform = `rotate(${handAngle}deg)`;
+        } else {
+          const items = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
+          items.forEach((num, index) => {
+            const angleDeg = index * 30;
+            const rad = (angleDeg - 90) * Math.PI / 180;
+            const x = cx + radius * Math.cos(rad);
+            const y = cy + radius * Math.sin(rad);
+
+            const el = document.createElement('div');
+            el.className = 'dt-clock-num' + (this.selectedMinute === num ? ' selected' : '');
+            el.style.left = `${x}px`;
+            el.style.top = `${y}px`;
+            el.textContent = String(num).padStart(2, '0');
+            numbersLayer.appendChild(el);
+          });
+
+          const handAngle = this.selectedMinute * 6;
+          hand.style.transform = `rotate(${handAngle}deg)`;
+        }
+      },
+
+      handleClockPointer(clientX, clientY, isCommit = false) {
+        const clockFace = document.getElementById('dt-clock-face');
+        if (!clockFace) return;
+        const rect = clockFace.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+
+        const dx = clientX - cx;
+        const dy = clientY - cy;
+
+        let deg = (Math.atan2(dy, dx) * 180 / Math.PI) + 90;
+        if (deg < 0) deg += 360;
+
+        if (this.timeMode === 'hour') {
+          let h = Math.round(deg / 30) % 12;
+          if (h === 0) h = 12;
+          this.selectedHour = h;
+          this.updateTimeDisplay();
+          this.renderClockFace();
+
+          if (isCommit) {
+            setTimeout(() => {
+              this.setTimeMode('minute');
+            }, 120);
+          }
+        } else {
+          let m = Math.round(deg / 6) % 60;
+          this.selectedMinute = m;
+          this.updateTimeDisplay();
+          this.renderClockFace();
+        }
+      },
+
+      confirmSelection() {
+        if (!this.selectedDate) this.selectedDate = new Date();
+
+        const d = String(this.selectedDate.getDate()).padStart(2, '0');
+        const m = String(this.selectedDate.getMonth() + 1).padStart(2, '0');
+        const y = this.selectedDate.getFullYear();
+        const formattedDate = `${d}-${m}-${y}`;
+
+        const formattedTime = `${String(this.selectedHour).padStart(2, '0')}:${String(this.selectedMinute).padStart(2, '0')} ${this.selectedPeriod}`;
+
+        const dateInput = document.getElementById(`modal-${this.targetField}-date`);
+        const timeInput = document.getElementById(`modal-${this.targetField}-time`);
+        if (dateInput) dateInput.value = formattedDate;
+        if (timeInput) timeInput.value = formattedTime;
+
+        const reqType = document.getElementById('modal-req-type')?.value;
+
+        // Auto Outing Rules
+        if (reqType === 'Outing') {
+          const day = this.selectedDate.getDay();
+          const isWeekday = (day >= 1 && day <= 5);
+
+          if (this.targetField === 'from') {
+            const toDateInput = document.getElementById('modal-to-date');
+            if (toDateInput) toDateInput.value = formattedDate;
+
+            const toTimeInput = document.getElementById('modal-to-time');
+            if (toTimeInput) {
+              if (isWeekday) {
+                // Must be exactly 7:00 PM for weekdays
+                toTimeInput.value = '07:00 PM';
+              } else {
+                let fromM = (this.selectedPeriod === 'PM' && this.selectedHour < 12 ? this.selectedHour + 12 : (this.selectedPeriod === 'AM' && this.selectedHour === 12 ? 0 : this.selectedHour)) * 60 + this.selectedMinute;
+                if (fromM <= 960) {
+                  if (!toTimeInput.value || toTimeInput.value === '05:00 PM') toTimeInput.value = '04:00 PM';
+                } else {
+                  toTimeInput.value = '07:00 PM';
+                }
+              }
+            }
+          } else if (this.targetField === 'to') {
+            const fromDateInput = document.getElementById('modal-from-date');
+            if (fromDateInput && !fromDateInput.value) fromDateInput.value = formattedDate;
+          }
+        }
+
+        this.close();
+        validateFormTimings();
+      }
+    };
+
+    // =====================================================
+    // REAL-TIME TIMINGS VALIDATION HELPER
+    // =====================================================
+    function validateFormTimings() {
+      const type = document.getElementById('modal-req-type')?.value;
+      const fromDate = document.getElementById('modal-from-date')?.value;
+      const fromTime = document.getElementById('modal-from-time')?.value;
+      const toDate = document.getElementById('modal-to-date')?.value;
+      const toTime = document.getElementById('modal-to-time')?.value;
+      const msgEl = document.getElementById('req-timing-validation-msg');
+
+      if (!msgEl) return true;
+
+      if (type !== 'Outing') {
+        if (fromDate && fromTime && toDate && toTime) {
+          const res = typeof validateRequestTimings === 'function' 
+            ? validateRequestTimings(type, fromDate, fromTime, toDate, toTime) 
+            : { valid: true };
+          if (!res.valid) {
+            msgEl.className = 'timing-validation-alert error';
+            msgEl.innerHTML = `⚠️ ${res.message}`;
+            msgEl.style.display = 'flex';
+            return false;
+          }
+        }
+        msgEl.style.display = 'none';
+        return true;
+      }
+
+      // Outing Rules
+      if (!fromDate || !fromTime || !toDate || !toTime) {
+        msgEl.className = 'timing-validation-alert info';
+        msgEl.innerHTML = `ℹ️ <strong>Outing Guidelines:</strong> Weekday after 4:30 PM (Return strictly 7:00 PM) • Weekend: 9:00 AM–4:00 PM or 4:00 PM–7:00 PM`;
+        msgEl.style.display = 'flex';
+        return true;
+      }
+
+      const res = typeof validateRequestTimings === 'function' 
+        ? validateRequestTimings('Outing', fromDate, fromTime, toDate, toTime) 
+        : { valid: true };
+
+      if (!res.valid) {
+        msgEl.className = 'timing-validation-alert error';
+        msgEl.innerHTML = `⚠️ ${res.message}`;
+        msgEl.style.display = 'flex';
+        return false;
+      }
+
+      const parts = fromDate.split('-');
+      const fDateObj = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+      const isWeekday = (fDateObj.getDay() >= 1 && fDateObj.getDay() <= 5);
+
+      msgEl.className = 'timing-validation-alert info';
+      if (isWeekday) {
+        msgEl.innerHTML = `✓ <strong>Valid Weekday Outing:</strong> Return Time 7:00 PM confirmed.`;
+      } else {
+        msgEl.innerHTML = `✓ <strong>Valid Weekend Outing:</strong> Slot timing confirmed.`;
+      }
+      msgEl.style.display = 'flex';
+      return true;
+    }
+
+    // =====================================================
+    // FORM SUBMISSION & STORAGE
+    // =====================================================
     function handleRequestSubmit(e) {
       e.preventDefault();
       const type = document.getElementById('modal-req-type').value;
@@ -1290,16 +1959,42 @@
       const toTime = document.getElementById('modal-to-time').value;
       const reason = document.getElementById('modal-reason').value;
 
+      // STRICT VALIDATION (Both frontend and backend logic)
+      if (typeof validateRequestTimings === 'function') {
+        const valRes = validateRequestTimings(type, fromDate, fromTime, toDate, toTime);
+        if (!valRes.valid) {
+          const msgEl = document.getElementById('req-timing-validation-msg');
+          if (msgEl) {
+            msgEl.className = 'timing-validation-alert error';
+            msgEl.innerHTML = `⚠️ ${valRes.message}`;
+            msgEl.style.display = 'flex';
+          }
+          Toast.error(valRes.message);
+          return;
+        }
+      }
+
       const now = new Date();
+      const sessionUser = typeof getSessionUser === 'function' ? getSessionUser() : null;
+
       const newReq = {
         id: 'req_' + Date.now(),
+        studentId: sessionUser ? sessionUser.uid : 'std_demo',
+        studentName: sessionUser ? sessionUser.name : 'STUDENT',
+        registerNumber: sessionUser ? (sessionUser.rollNumber || sessionUser.registerNumber) : '125UCS071',
+        room: sessionUser ? sessionUser.room : '416',
         fromDate: formatDateDisplay(fromDate),
         fromTime: formatTimeDisplay(fromTime),
         toDate: formatDateDisplay(toDate),
         toTime: formatTimeDisplay(toTime),
+        rawFromDate: fromDate,
+        rawFromTime: fromTime,
+        rawToDate: toDate,
+        rawToTime: toTime,
         timestamp: now.toISOString(),
         type: type,
         place: reason,
+        reason: reason,
         status: 'pending',
         stage: 0
       };
@@ -1308,9 +2003,23 @@
       saveRequests();
       renderRequests(requests);
 
+      // Save to Firebase Realtime Database
+      if (typeof isFirebaseConfigured === 'function' && isFirebaseConfigured() && typeof DB !== 'undefined' && DB.request) {
+        DB.request(newReq.id).set(newReq).catch(err => console.warn('Firebase sync request error:', err));
+      }
+
+      // Sync to shared requests for admin/owner
+      try {
+        const shared = JSON.parse(localStorage.getItem('mei_shared_requests') || '[]');
+        shared.unshift(newReq);
+        localStorage.setItem('mei_shared_requests', JSON.stringify(shared));
+      } catch(e) {}
+
       modal.classList.remove('show');
       document.getElementById('new-req-form').reset();
-      
+      const msgEl = document.getElementById('req-timing-validation-msg');
+      if (msgEl) msgEl.style.display = 'none';
+
       if (isSingleStage(type)) {
         Toast.show(`${type} request submitted! Pending Warden approval.`, 'info');
       } else {
@@ -1331,6 +2040,9 @@
           requests = requests.filter(r => r.id !== id);
           saveRequests();
           renderRequests(requests);
+          if (typeof isFirebaseConfigured === 'function' && isFirebaseConfigured() && typeof DB !== 'undefined' && DB.request) {
+            DB.request(id).remove().catch(() => {});
+          }
           Toast.show('Request cancelled successfully!', 'success');
         }
       });
@@ -1342,14 +2054,12 @@
       if (!req) return;
 
       if (isSingleStage(req.type)) {
-        // Single-stage: Warden approves directly
         req.status = 'approved';
         req.stage = 1;
         saveRequests();
         renderRequests(requests);
-        Toast.show(`Warden Approved! Curved shape turned to Mint Green.`, 'success');
+        Toast.show(`Warden Approved! Request approved.`, 'success');
       } else {
-        // Three-stage: Class Teacher -> HOD -> Warden
         let s = req.stage || 0;
         if (s === 0) {
           req.stage = 1;
@@ -1360,7 +2070,7 @@
         } else if (s === 2) {
           req.stage = 3;
           req.status = 'approved';
-          Toast.show(`Warden Approved! Fully approved, shape turned to Mint Green!`, 'success');
+          Toast.show(`Warden Approved! Fully approved!`, 'success');
         }
         saveRequests();
         renderRequests(requests);
@@ -1373,13 +2083,19 @@
       localStorage.setItem('mei_student_requests_v2', JSON.stringify(requests));
     }
 
-    // Always reload from storage when page is shown (e.g. returning from Dashboard)
     window.addEventListener('pageshow', () => {
       initRequests();
     });
 
     document.addEventListener('DOMContentLoaded', () => {
+      initFirebase();
+      const session = typeof checkSession === 'function' ? checkSession() : { valid: false };
+      if (!session.valid) {
+        window.location.replace('login.html');
+        return;
+      }
       initRequests();
+      DateTimePicker.init();
       PageLoader.hide();
     });
   </script>

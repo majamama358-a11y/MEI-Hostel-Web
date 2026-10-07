@@ -233,33 +233,57 @@ function authenticateUser(username, password) {
 }
 
 /**
- * Get current session user
+ * Get current session user (Persisted across PWA / browser restarts)
  */
 function getSessionUser() {
   try {
-    const data = sessionStorage.getItem(LOCAL_SESSION_KEY);
-    return data ? JSON.parse(data) : null;
+    let data = localStorage.getItem(LOCAL_SESSION_KEY);
+    if (!data) {
+      data = sessionStorage.getItem(LOCAL_SESSION_KEY);
+    }
+    if (!data) return null;
+
+    const user = JSON.parse(data);
+    if (!user || !user.uid) return null;
+
+    // Verify account exists and is not disabled
+    const users = getLocalUsersDB();
+    if (users[user.uid]) {
+      if (users[user.uid].status === 'disabled') {
+        clearSession();
+        return null;
+      }
+      return { ...users[user.uid], ...user };
+    }
+    return user;
   } catch (e) {
     return null;
   }
 }
 
 /**
- * Set current session user
+ * Set current session user (Persists in localStorage and sessionStorage)
  */
 function setSessionUser(userObj) {
   const safe = { ...userObj };
   delete safe.passwordHash;
-  sessionStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify(safe));
+  const jsonStr = JSON.stringify(safe);
+  localStorage.setItem(LOCAL_SESSION_KEY, jsonStr);
+  sessionStorage.setItem(LOCAL_SESSION_KEY, jsonStr);
+  localStorage.setItem('mei_auth_token', 'token_' + safe.uid + '_' + Date.now());
 }
 
 /**
  * Clear session
  */
 function clearSession() {
+  localStorage.removeItem(LOCAL_SESSION_KEY);
   sessionStorage.removeItem(LOCAL_SESSION_KEY);
   sessionStorage.removeItem('mei_demo_user');
   localStorage.removeItem('mei_auth_token');
+  if (typeof auth !== 'undefined' && auth && auth.signOut) {
+    try { auth.signOut().catch(() => {}); } catch (e) {}
+  }
 }
 
 // =====================================================
@@ -512,29 +536,139 @@ function clearActivityLogs(clearedByUID) {
 }
 
 // =====================================================
-// PASS SETTINGS (kept for student-facing pages)
+// PASS SETTINGS & OUTING RULES
 // =====================================================
 const DEFAULT_PASS_SETTINGS = {
   restrictionTime: '10:00 PM',
   allowTime: { from: '05:59 AM', to: '05:59 PM' },
   outingRules: [
     {
-      days: 'Monday, Tuesday, Thursday, Friday',
+      days: 'Monday to Friday',
       outTime: '16:30',
       inTime: '19:00',
-      applyTime: '16:30 – 17:15'
+      applyTime: 'Allowed after 16:30 (Return strictly 19:00)'
     },
     {
-      days: 'Wednesday, Saturday, Sunday',
+      days: 'Saturday, Sunday (Morning Slot)',
       outTime: '09:00',
-      inTime: '17:00',
-      applyTime: '09:00 – 10:00'
+      inTime: '16:00',
+      applyTime: '09:00 – 16:00'
     },
     {
-      days: 'Wednesday, Saturday, Sunday',
+      days: 'Saturday, Sunday (Evening Slot)',
       outTime: '16:00',
       inTime: '19:00',
-      applyTime: '16:00 – 17:00'
+      applyTime: '16:00 – 19:00'
     }
   ]
 };
+
+/**
+ * Strict Outing and General Request Timings Validation
+ * - Weekdays (Mon-Fri): Outing only from 4:30 PM onwards. Return Time must be exactly 7:00 PM.
+ * - Weekends (Sat-Sun): Morning Slot (9:00 AM - 4:00 PM) or Evening Slot (4:00 PM - 7:00 PM).
+ */
+function validateRequestTimings(type, fromDateStr, fromTimeStr, toDateStr, toTimeStr) {
+  if (!fromDateStr || !fromTimeStr || !toDateStr || !toTimeStr) {
+    return { valid: false, message: 'Please select both From and To dates and times.' };
+  }
+
+  function timeToMinutes(tStr) {
+    if (!tStr) return NaN;
+    const clean = String(tStr).trim();
+    const ampmMatch = clean.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+    if (!ampmMatch) {
+      const parts = clean.split(':');
+      if (parts.length >= 2) {
+        return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+      }
+      return NaN;
+    }
+    let h = parseInt(ampmMatch[1], 10);
+    const m = parseInt(ampmMatch[2], 10);
+    const ampm = ampmMatch[3] ? ampmMatch[3].toUpperCase() : null;
+    if (ampm === 'PM' && h < 12) h += 12;
+    if (ampm === 'AM' && h === 12) h = 0;
+    return h * 60 + m;
+  }
+
+  function parseDate(dStr) {
+    if (!dStr) return null;
+    const clean = String(dStr).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
+      const [y, m, d] = clean.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+    if (/^\d{2}-\d{2}-\d{4}$/.test(clean)) {
+      const [d, m, y] = clean.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+    const parsed = new Date(clean);
+    return isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  const fromD = parseDate(fromDateStr);
+  const toD = parseDate(toDateStr);
+  const fromM = timeToMinutes(fromTimeStr);
+  const toM = timeToMinutes(toTimeStr);
+
+  if (!fromD || !toD || isNaN(fromM) || isNaN(toM)) {
+    return { valid: false, message: 'Invalid date or time format.' };
+  }
+
+  // Outing Specific Strict Validation
+  if (type === 'Outing') {
+    // 1. Must be on the same date
+    const sameDay = fromD.getFullYear() === toD.getFullYear() &&
+                    fromD.getMonth() === toD.getMonth() &&
+                    fromD.getDate() === toD.getDate();
+    if (!sameDay) {
+      return { valid: false, message: 'Outing must be completed on the same day.' };
+    }
+
+    const dayOfWeek = fromD.getDay(); // 0 = Sun, 6 = Sat, 1..5 = Mon..Fri
+    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+
+    if (!isWeekend) {
+      // NORMAL WEEKDAYS (Monday to Friday)
+      if (fromM < 990) { // 4:30 PM is 990 minutes
+        return { valid: false, message: 'Weekday outing is available only after 4:30 PM.' };
+      }
+      if (toM !== 1140) { // 7:00 PM is 1140 minutes
+        return { valid: false, message: 'Outing return time must be 7:00 PM.' };
+      }
+      if (fromM >= 1140) {
+        return { valid: false, message: 'Outing start time must be before 7:00 PM.' };
+      }
+      return { valid: true };
+    } else {
+      // SATURDAY & SUNDAY (Weekend)
+      // Allowed overall window: 9:00 AM (540m) to 7:00 PM (1140m)
+      if (fromM < 540 || toM < 540 || fromM > 1140 || toM > 1140) {
+        return { valid: false, message: 'Weekend outing is available only between 9:00 AM and 7:00 PM.' };
+      }
+      if (fromM >= toM) {
+        return { valid: false, message: 'Return time must be after departure time.' };
+      }
+
+      // Slot 1: Morning Slot 09:00 AM (540) to 04:00 PM (960)
+      const inMorningSlot = (fromM >= 540 && toM <= 960);
+      // Slot 2: Evening Slot 04:00 PM (960) to 07:00 PM (1140)
+      const inEveningSlot = (fromM >= 960 && toM <= 1140);
+
+      if (!inMorningSlot && !inEveningSlot) {
+        return { valid: false, message: 'Weekend outing is available in two slots: 9:00 AM–4:00 PM and 4:00 PM–7:00 PM.' };
+      }
+      return { valid: true };
+    }
+  }
+
+  // Non-Outing Validation (Holiday, Leave, Symposium, etc.)
+  const fromTimestamp = fromD.getTime() + fromM * 60000;
+  const toTimestamp = toD.getTime() + toM * 60000;
+  if (toTimestamp < fromTimestamp) {
+    return { valid: false, message: 'Return date & time cannot be earlier than departure date & time.' };
+  }
+
+  return { valid: true };
+}

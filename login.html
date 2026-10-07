@@ -362,11 +362,10 @@
       const redirectUrl = typeof getRoleRedirectURL === 'function' 
         ? getRoleRedirectURL(session.user.role)
         : (session.user.role === 'owner' ? 'owner-panel.html' : (session.user.role === 'admin' ? 'admin-panel.html' : 'dashboard.html'));
-      window.location.href = redirectUrl;
-    }
-
-    // Login form submission
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      window.location.replace(redirectUrl);
+    } else {
+      // Login form submission
+      document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const username = (document.getElementById('login-username').value || '').trim();
       const password = (document.getElementById('login-password').value || '').trim();
@@ -428,6 +427,7 @@
         btn.disabled = false;
       }
     });
+    }
 
     const forgotLink = document.getElementById('forgot-link');
     if (forgotLink) {

@@ -1,5 +1,5 @@
 // Mahendra Hostel - Service Worker (PWA Offline Support)
-const CACHE_NAME = 'mei-hostel-v1.3';
+const CACHE_NAME = 'mei-hostel-v1.4';
 const STATIC_ASSETS = [
   './',
   './index.html',

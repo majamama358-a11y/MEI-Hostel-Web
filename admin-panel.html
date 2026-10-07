@@ -458,6 +458,9 @@
       </div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;">
+      <button id="btn-owner-portal" class="btn-header-logout" style="display:none;background:rgba(255,255,255,0.25);" onclick="window.location.href='owner-panel.html'">
+        👑 <span>Owner Portal →</span>
+      </button>
       <button class="btn-header-logout" onclick="handleAdminLogout()">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -500,7 +503,7 @@
 
       <button class="tab-btn" id="tab-btn-students" onclick="switchAdminTab('students')">
         <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>
-        <span>Student Directory</span>
+        <span>User Accounts</span>
       </button>
 
       <button class="tab-btn" id="tab-btn-parcels" onclick="switchAdminTab('parcels')">
@@ -538,13 +541,19 @@
       </div>
     </div>
 
-    <!-- TAB 2: STUDENT DIRECTORY -->
+    <!-- TAB 2: USER & STAFF ACCOUNTS -->
     <div id="pane-students" class="tab-pane">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap;">
         <div style="flex:1;min-width:240px;">
-          <input type="text" id="student-search-input" placeholder="Search students by name, reg no, room..." style="width:100%;box-sizing:border-box;padding:10px 14px;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);outline:none;font-family:'Nunito',sans-serif;" oninput="renderStudents()">
+          <input type="text" id="student-search-input" placeholder="Search accounts by name, username, reg no, room..." style="width:100%;box-sizing:border-box;padding:10px 14px;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);outline:none;font-family:'Nunito',sans-serif;" oninput="renderStudents()">
         </div>
-        <button class="btn btn-primary" onclick="openAddStudentModal()">+ Enroll New Student</button>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="filter-pill active" id="f-user-all" onclick="setUserRoleFilter('all', this)">All</button>
+          <button class="filter-pill" id="f-user-students" onclick="setUserRoleFilter('student', this)">Students</button>
+          <button class="filter-pill" id="f-user-admins" onclick="setUserRoleFilter('admin', this)">Admins</button>
+          <button class="filter-pill" id="f-user-owners" onclick="setUserRoleFilter('owner', this)">Owners</button>
+        </div>
+        <button class="btn btn-primary" onclick="openAddStudentModal()">+ Add Account (User / Admin / Owner)</button>
       </div>
 
       <div id="students-container" class="student-grid">
@@ -614,36 +623,36 @@
     </div>
   </div>
 
-  <!-- ADD STUDENT MODAL -->
+  <!-- ADD USER / ADMIN / OWNER MODAL -->
   <div id="modal-add-student" class="admin-modal">
-    <div class="modal-box">
+    <div class="modal-box" style="max-width:440px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h3 style="margin:0;font-size:1.2rem;font-weight:800;">Enroll New Student</h3>
+        <h3 style="margin:0;font-size:1.2rem;font-weight:800;" id="add-modal-title">Create Account</h3>
         <button style="background:none;border:none;font-size:1.4rem;cursor:pointer;" onclick="closeAdminModal('modal-add-student')">&times;</button>
       </div>
 
       <form id="add-student-form" onsubmit="handleAddStudentSubmit(event)">
         <div style="display:flex;flex-direction:column;gap:12px;">
+          <!-- Role Selector -->
           <div>
-            <label style="font-size:0.8rem;font-weight:700;">Student Name *</label>
+            <label style="font-size:0.8rem;font-weight:700;display:block;margin-bottom:6px;">Select Role *</label>
+            <div style="display:flex;gap:8px;">
+              <button type="button" class="role-pill active" id="btn-role-student" onclick="setAccountRole('student')" style="flex:1;padding:8px;border-radius:8px;font-weight:800;cursor:pointer;border:1.5px solid var(--admin-primary);background:rgba(27,99,194,0.12);color:var(--admin-primary);">Student</button>
+              <button type="button" class="role-pill" id="btn-role-admin" onclick="setAccountRole('admin')" style="flex:1;padding:8px;border-radius:8px;font-weight:800;cursor:pointer;border:1.5px solid var(--border-color);background:#fff;color:var(--text-muted);">Admin</button>
+              <button type="button" class="role-pill" id="btn-role-owner" onclick="setAccountRole('owner')" style="flex:1;padding:8px;border-radius:8px;font-weight:800;cursor:pointer;border:1.5px solid var(--border-color);background:#fff;color:var(--text-muted);">Owner</button>
+            </div>
+            <input type="hidden" id="as-role" value="student">
+          </div>
+
+          <div>
+            <label style="font-size:0.8rem;font-weight:700;">Full Name *</label>
             <input type="text" id="as-name" required placeholder="e.g. SURIYA PRAKASH" style="width:100%;box-sizing:border-box;padding:10px;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);">
           </div>
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
             <div>
-              <label style="font-size:0.8rem;font-weight:700;">Roll Number</label>
-              <input type="text" id="as-regno" placeholder="e.g. 125UCS090" style="width:100%;box-sizing:border-box;padding:10px;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);">
-            </div>
-            <div>
-              <label style="font-size:0.8rem;font-weight:700;">Room No *</label>
-              <input type="text" id="as-room" required placeholder="A405" style="width:100%;box-sizing:border-box;padding:10px;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);">
-            </div>
-          </div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-            <div>
               <label style="font-size:0.8rem;font-weight:700;">Username *</label>
-              <input type="text" id="as-username" required placeholder="suriyap" style="width:100%;box-sizing:border-box;padding:10px;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);">
+              <input type="text" id="as-username" required placeholder="username" style="width:100%;box-sizing:border-box;padding:10px;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);">
             </div>
             <div>
               <label style="font-size:0.8rem;font-weight:700;">Password *</label>
@@ -651,9 +660,23 @@
             </div>
           </div>
 
+          <!-- Student specific fields -->
+          <div id="student-only-fields" style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div>
+                <label style="font-size:0.8rem;font-weight:700;">Roll Number</label>
+                <input type="text" id="as-regno" placeholder="e.g. 125UCS090" style="width:100%;box-sizing:border-box;padding:10px;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);">
+              </div>
+              <div>
+                <label style="font-size:0.8rem;font-weight:700;">Room No *</label>
+                <input type="text" id="as-room" placeholder="A405" style="width:100%;box-sizing:border-box;padding:10px;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);">
+              </div>
+            </div>
+          </div>
+
           <div>
-            <label style="font-size:0.8rem;font-weight:700;">Department *</label>
-            <input type="text" id="as-dept" required placeholder="BE (CSE)" style="width:100%;box-sizing:border-box;padding:10px;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);">
+            <label style="font-size:0.8rem;font-weight:700;" id="dept-label">Department *</label>
+            <input type="text" id="as-dept" required placeholder="e.g. BE (CSE) or Administration" style="width:100%;box-sizing:border-box;padding:10px;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);">
           </div>
 
           <div>
@@ -663,7 +686,53 @@
 
           <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:10px;">
             <button type="button" class="btn btn-secondary" onclick="closeAdminModal('modal-add-student')">Cancel</button>
-            <button type="submit" class="btn btn-primary">Enroll Student</button>
+            <button type="submit" class="btn btn-primary" id="btn-submit-account">Create Account</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT USER MODAL -->
+  <div id="modal-edit-user" class="admin-modal">
+    <div class="modal-box" style="max-width:440px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h3 style="margin:0;font-size:1.2rem;font-weight:800;">Edit User Account</h3>
+        <button style="background:none;border:none;font-size:1.4rem;cursor:pointer;" onclick="closeAdminModal('modal-edit-user')">&times;</button>
+      </div>
+
+      <form id="edit-user-form" onsubmit="handleEditUserSubmit(event)">
+        <input type="hidden" id="edit-user-uid">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div>
+            <label style="font-size:0.8rem;font-weight:700;">Full Name *</label>
+            <input type="text" id="edit-user-name" required style="width:100%;box-sizing:border-box;padding:10px;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);">
+          </div>
+
+          <div>
+            <label style="font-size:0.8rem;font-weight:700;">Reset Password (leave blank to keep current)</label>
+            <input type="password" id="edit-user-pass" minlength="6" placeholder="Leave empty to keep unchanged" style="width:100%;box-sizing:border-box;padding:10px;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);">
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div>
+              <label style="font-size:0.8rem;font-weight:700;">Room No</label>
+              <input type="text" id="edit-user-room" style="width:100%;box-sizing:border-box;padding:10px;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);">
+            </div>
+            <div>
+              <label style="font-size:0.8rem;font-weight:700;">Phone</label>
+              <input type="tel" id="edit-user-phone" style="width:100%;box-sizing:border-box;padding:10px;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);">
+            </div>
+          </div>
+
+          <div>
+            <label style="font-size:0.8rem;font-weight:700;">Department</label>
+            <input type="text" id="edit-user-dept" style="width:100%;box-sizing:border-box;padding:10px;border:1.5px solid var(--border-color);border-radius:var(--radius-sm);">
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:10px;">
+            <button type="button" class="btn btn-secondary" onclick="closeAdminModal('modal-edit-user')">Cancel</button>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
           </div>
         </div>
       </form>
@@ -717,6 +786,10 @@
     const currentUser = requireRole(['admin', 'owner']);
     if (currentUser) {
       document.getElementById('admin-user-display').textContent = `${currentUser.name} (${currentUser.role.toUpperCase()})`;
+      if (currentUser.role === 'owner') {
+        const obtn = document.getElementById('btn-owner-portal');
+        if (obtn) obtn.style.display = 'inline-flex';
+      }
     }
 
     let activePassFilter = 'pending';
@@ -893,78 +966,193 @@
       renderPasses();
     }
 
-    // Students Directory
+    // Users & Roles Management
+    let activeUserRoleFilter = 'all';
+
+    function setUserRoleFilter(role, btn) {
+      activeUserRoleFilter = role;
+      document.querySelectorAll('#pane-students .filter-pill').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderStudents();
+    }
+
+    function setAccountRole(role) {
+      const roleInput = document.getElementById('as-role');
+      if (roleInput) roleInput.value = role;
+
+      const roles = ['student', 'admin', 'owner'];
+      roles.forEach(r => {
+        const b = document.getElementById(`btn-role-${r}`);
+        if (!b) return;
+        if (r === role) {
+          b.style.border = '1.5px solid var(--admin-primary)';
+          b.style.background = 'rgba(27,99,194,0.12)';
+          b.style.color = 'var(--admin-primary)';
+        } else {
+          b.style.border = '1.5px solid var(--border-color)';
+          b.style.background = '#fff';
+          b.style.color = 'var(--text-muted)';
+        }
+      });
+
+      const studentFields = document.getElementById('student-only-fields');
+      const roomInput = document.getElementById('as-room');
+      const deptLabel = document.getElementById('dept-label');
+      const title = document.getElementById('add-modal-title');
+      const btnSubmit = document.getElementById('btn-submit-account');
+
+      if (role === 'student') {
+        if (studentFields) studentFields.style.display = 'flex';
+        if (roomInput) roomInput.required = true;
+        if (deptLabel) deptLabel.textContent = 'Department *';
+        if (title) title.textContent = 'Enroll Student';
+        if (btnSubmit) btnSubmit.textContent = 'Enroll Student';
+      } else if (role === 'admin') {
+        if (studentFields) studentFields.style.display = 'none';
+        if (roomInput) roomInput.required = false;
+        if (deptLabel) deptLabel.textContent = 'Department / Designation *';
+        if (title) title.textContent = 'Create Admin Account';
+        if (btnSubmit) btnSubmit.textContent = 'Create Admin Account';
+      } else if (role === 'owner') {
+        if (studentFields) studentFields.style.display = 'none';
+        if (roomInput) roomInput.required = false;
+        if (deptLabel) deptLabel.textContent = 'Department / Designation *';
+        if (title) title.textContent = 'Create Owner Account';
+        if (btnSubmit) btnSubmit.textContent = 'Create Owner Account';
+      }
+    }
+
     function renderStudents() {
-      const students = getUsersByRole('student');
-      document.getElementById('stat-students-total').textContent = students.length;
+      const allUsers = typeof getAllUsers === 'function' ? getAllUsers() : Object.values(getLocalUsersDB());
+      const studentsOnly = allUsers.filter(u => u.role === 'student');
+      const statEl = document.getElementById('stat-students-total');
+      if (statEl) statEl.textContent = studentsOnly.length;
+
+      let filtered = allUsers;
+      if (activeUserRoleFilter !== 'all') {
+        filtered = filtered.filter(u => u.role === activeUserRoleFilter);
+      }
 
       const q = (document.getElementById('student-search-input')?.value || '').toLowerCase().trim();
-      let filtered = students;
       if (q) {
         filtered = filtered.filter(s => 
           (s.name && s.name.toLowerCase().includes(q)) ||
+          (s.username && s.username.toLowerCase().includes(q)) ||
           (s.registerNumber && s.registerNumber.toLowerCase().includes(q)) ||
+          (s.rollNumber && s.rollNumber.toLowerCase().includes(q)) ||
           (s.room && s.room.toLowerCase().includes(q)) ||
-          (s.department && s.department.toLowerCase().includes(q))
+          (s.department && s.department.toLowerCase().includes(q)) ||
+          (s.phone && s.phone.toLowerCase().includes(q)) ||
+          (s.role && s.role.toLowerCase().includes(q))
         );
       }
 
       const container = document.getElementById('students-container');
+      if (!container) return;
+
       if (filtered.length === 0) {
         container.innerHTML = `
           <div style="grid-column:1/-1;text-align:center;padding:48px 20px;background:#fff;border-radius:var(--radius-md);border:1px solid var(--border-color);color:var(--text-muted);">
-            <div style="font-size:2rem;margin-bottom:8px">🎓</div>
-            <div style="font-weight:700">No students enrolled yet.</div>
-            <button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="openAddStudentModal()">+ Enroll Student</button>
+            <div style="font-size:2rem;margin-bottom:8px">👥</div>
+            <div style="font-weight:700">No user accounts found matching current filter.</div>
+            <button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="openAddStudentModal()">+ Add Account</button>
           </div>
         `;
         return;
       }
 
-      container.innerHTML = filtered.map(s => `
-        <div class="student-card">
-          <div class="student-card-head">
-            <div class="student-avatar">${(s.name || 'S').charAt(0)}</div>
-            <div>
-              <div style="font-weight:800;font-size:1.05rem;">${s.name}</div>
-              <div style="font-size:0.8rem;color:var(--text-muted);font-weight:700;">Roll: ${s.rollNumber || s.registerNumber || 'N/A'}</div>
+      const roleBadgeColors = {
+        owner: 'background:#fef3c7;color:#92400e;border:1px solid #fde68a;',
+        admin: 'background:#e0e7ff;color:#3730a3;border:1px solid #c7d2fe;',
+        student: 'background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;'
+      };
+
+      container.innerHTML = filtered.map(u => {
+        const initial = (u.name || u.username || 'U').charAt(0).toUpperCase();
+        const roleStyle = roleBadgeColors[u.role] || roleBadgeColors.student;
+        const isMaster = !!u.isMaster;
+        const isSelf = currentUser && currentUser.uid === u.uid;
+        const isActive = u.status !== 'disabled';
+
+        return `
+          <div class="student-card" style="${isActive ? '' : 'opacity:0.65;background:#f8fafc;'}">
+            <div class="student-card-head" style="justify-content:space-between;align-items:flex-start;">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div class="student-avatar" style="${u.role === 'owner' ? 'background:linear-gradient(135deg, #f59e0b, #d97706);' : (u.role === 'admin' ? 'background:linear-gradient(135deg, #1b63c2, #3e1e82);' : '')}">${initial}</div>
+                <div>
+                  <div style="font-weight:800;font-size:1.02rem;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                    <span>${u.name || u.username}</span>
+                    <span style="font-size:0.7rem;font-weight:800;padding:2px 8px;border-radius:12px;text-transform:uppercase;${roleStyle}">
+                      ${u.role}
+                    </span>
+                  </div>
+                  <div style="font-size:0.78rem;color:var(--text-muted);font-weight:700;">
+                    @${u.username} ${u.rollNumber ? `• Roll: ${u.rollNumber}` : ''}
+                  </div>
+                </div>
+              </div>
+              <span style="font-size:0.72rem;font-weight:800;padding:2px 8px;border-radius:10px;${isActive ? 'background:#dcfce7;color:#166534;' : 'background:#fee2e2;color:#991b1b;'}">
+                ${isActive ? 'Active' : 'Disabled'}
+              </span>
+            </div>
+
+            <div style="font-size:0.83rem;color:#334155;display:flex;flex-direction:column;gap:4px;border-top:1px dashed var(--border-color);padding-top:8px;">
+              ${u.room ? `<div><strong>Room:</strong> ${u.room}</div>` : ''}
+              ${u.department ? `<div><strong>Dept:</strong> ${u.department}</div>` : ''}
+              ${u.phone ? `<div><strong>Phone:</strong> ${u.phone}</div>` : ''}
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;gap:6px;border-top:1px solid #f1f5f9;padding-top:8px;margin-top:auto;">
+              <button class="btn btn-secondary btn-sm" onclick="openEditUserModal('${u.uid}')" style="padding:4px 10px;font-size:0.78rem;">
+                ✏️ Edit
+              </button>
+              ${!isMaster && !isSelf ? `
+                <button class="btn ${isActive ? 'btn-secondary' : 'btn-primary'} btn-sm" onclick="toggleUserAccountStatus('${u.uid}')" style="padding:4px 10px;font-size:0.78rem;">
+                  ${isActive ? 'Disable' : 'Enable'}
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="deleteUserAccount('${u.uid}')" style="padding:4px 10px;font-size:0.78rem;">
+                  🗑️
+                </button>
+              ` : ''}
             </div>
           </div>
-
-          <div style="font-size:0.84rem;color:#334155;display:flex;flex-direction:column;gap:4px;border-top:1px dashed var(--border-color);padding-top:8px;">
-            <div><strong>Room:</strong> ${s.room || 'N/A'}</div>
-            <div><strong>Dept:</strong> ${s.department || 'N/A'}</div>
-            ${s.phone ? `<div><strong>Phone:</strong> ${s.phone}</div>` : ''}
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function openAddStudentModal() {
+      const form = document.getElementById('add-student-form');
+      if (form) form.reset();
+      setAccountRole('student');
       document.getElementById('modal-add-student').classList.add('show');
     }
 
     function handleAddStudentSubmit(e) {
       e.preventDefault();
+      const role = document.getElementById('as-role').value || 'student';
       const name = document.getElementById('as-name').value.trim();
-      const registerNumber = document.getElementById('as-regno').value.trim();
-      const room = document.getElementById('as-room').value.trim();
+      const registerNumber = document.getElementById('as-regno')?.value.trim() || '';
+      const room = document.getElementById('as-room')?.value.trim() || '';
       const username = document.getElementById('as-username').value.trim();
       const password = document.getElementById('as-password').value;
       const department = document.getElementById('as-dept').value.trim();
       const phone = document.getElementById('as-phone').value.trim();
 
-      if (!room) {
-        Toast.error('Please enter Room Number');
+      if (role === 'student' && !room) {
+        Toast.error('Please enter Room Number for the student');
         return;
       }
       if (!department) {
-        Toast.error('Please enter Department');
+        Toast.error('Please enter Department / Designation');
+        return;
+      }
+      if (password.length < 6) {
+        Toast.error('Password must be at least 6 characters');
         return;
       }
 
       const res = createUser({
-        role: 'student',
+        role,
         name,
         registerNumber,
         rollNumber: registerNumber,
@@ -976,13 +1164,99 @@
       }, currentUser.uid);
 
       if (res.success) {
-        Toast.success(`Enrolled student ${name}!`);
+        Toast.success(`Created ${role.toUpperCase()} account for ${name}!`);
         closeAdminModal('modal-add-student');
         document.getElementById('add-student-form').reset();
         renderStudents();
       } else {
         Toast.error(res.message);
       }
+    }
+
+    function openEditUserModal(uid) {
+      const users = getLocalUsersDB();
+      const u = users[uid];
+      if (!u) {
+        Toast.error('User not found');
+        return;
+      }
+
+      document.getElementById('edit-user-uid').value = uid;
+      document.getElementById('edit-user-name').value = u.name || '';
+      document.getElementById('edit-user-pass').value = '';
+      document.getElementById('edit-user-room').value = u.room || '';
+      document.getElementById('edit-user-phone').value = u.phone || '';
+      document.getElementById('edit-user-dept').value = u.department || '';
+
+      document.getElementById('modal-edit-user').classList.add('show');
+    }
+
+    function handleEditUserSubmit(e) {
+      e.preventDefault();
+      const uid = document.getElementById('edit-user-uid').value;
+      const name = document.getElementById('edit-user-name').value.trim();
+      const pass = document.getElementById('edit-user-pass').value.trim();
+      const room = document.getElementById('edit-user-room').value.trim();
+      const phone = document.getElementById('edit-user-phone').value.trim();
+      const dept = document.getElementById('edit-user-dept').value.trim();
+
+      const updates = {
+        name,
+        room,
+        phone,
+        department: dept
+      };
+
+      if (pass) {
+        if (pass.length < 6) {
+          Toast.error('New password must be at least 6 characters');
+          return;
+        }
+        updates.password = pass;
+      }
+
+      const res = updateUser(uid, updates, currentUser.uid);
+      if (res.success) {
+        Toast.success('User updated successfully!');
+        closeAdminModal('modal-edit-user');
+        renderStudents();
+      } else {
+        Toast.error(res.message);
+      }
+    }
+
+    function toggleUserAccountStatus(uid) {
+      const res = toggleUserStatus(uid, currentUser.uid);
+      if (res.success) {
+        Toast.success(res.message);
+        renderStudents();
+      } else {
+        Toast.error(res.message);
+      }
+    }
+
+    function deleteUserAccount(uid) {
+      const users = getLocalUsersDB();
+      const u = users[uid];
+      if (!u) return;
+
+      Confirm.show({
+        title: 'Delete Account',
+        message: `Are you sure you want to permanently delete account "${u.name || u.username}" (${u.role.toUpperCase()})?`,
+        icon: 'danger',
+        confirmText: 'Yes, Delete',
+        cancelText: 'Cancel',
+        danger: true,
+        onConfirm: () => {
+          const res = deleteUser(uid, currentUser.uid);
+          if (res.success) {
+            Toast.success(`Deleted account "${u.name || u.username}".`);
+            renderStudents();
+          } else {
+            Toast.error(res.message);
+          }
+        }
+      });
     }
 
     // Parcels
