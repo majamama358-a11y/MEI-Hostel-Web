@@ -206,18 +206,18 @@
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 13px;
+      gap: 12px;
     }
 
     /* Request Card */
     .req-card {
       background: #ffffff;
-      border-radius: 16px;
-      padding: 16px 16px 14px 18px;
+      border-radius: 14px;
+      padding: 14px 14px 12px 16px;
       margin: 0;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       border: 1px solid rgba(0, 0, 0, 0.04);
       box-sizing: border-box;
       width: 100%;
@@ -228,12 +228,12 @@
     .req-card.is-approved::after {
       content: '';
       position: absolute;
-      top: -20px;
-      bottom: -20px;
-      right: 0;
-      width: 44%;
-      background: #cbf6e2;
-      border-radius: 100% 0 0 100% / 50% 0 0 50%;
+      top: -15%;
+      bottom: -15%;
+      right: -5%;
+      width: 42%;
+      background: #c8f5df;
+      border-radius: 50% 0 0 50%;
       z-index: 0;
       pointer-events: none;
     }
@@ -242,12 +242,12 @@
     .req-card.is-pending::after {
       content: '';
       position: absolute;
-      top: -20px;
-      bottom: -20px;
-      right: 0;
-      width: 44%;
+      top: -15%;
+      bottom: -15%;
+      right: -5%;
+      width: 42%;
       background: #fef08a;
-      border-radius: 100% 0 0 100% / 50% 0 0 50%;
+      border-radius: 50% 0 0 50%;
       z-index: 0;
       pointer-events: none;
     }
@@ -257,7 +257,7 @@
       z-index: 1;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 7px;
     }
 
     .req-info-row {
