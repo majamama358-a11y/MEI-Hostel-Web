@@ -14,34 +14,46 @@
   <link rel="stylesheet" href="css/responsive.css">
   <style>
     body {
-      background: #f4f6fa;
+      background: #f4effa;
       margin: 0;
       padding: 0;
       font-family: 'Nunito', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
 
     .app-page {
-      background: #f4f6fa;
+      background: #f4effa;
       min-height: 100vh;
       min-height: 100dvh;
       position: relative;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
     }
 
-    /* Header matching Screenshot 2 */
+    /* Header matching Screenshot 1 */
     .app-header {
-      background: linear-gradient(90deg, #1b63c2 0%, #3e1e82 100%) !important;
-      padding: calc(var(--safe-top) + 12px) 16px 14px !important;
+      background: linear-gradient(90deg, #1860c4 0%, #3e1b8a 100%) !important;
+      padding: calc(var(--safe-top, 0px) + 12px) 16px 12px !important;
       display: flex !important;
       align-items: center !important;
       justify-content: space-between !important;
       border-bottom: none !important;
       box-shadow: 0 2px 10px rgba(30, 20, 100, 0.2) !important;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      min-height: 56px;
+      box-sizing: border-box;
+      gap: 12px;
     }
 
     .header-left-wrap {
       display: flex;
       align-items: center;
       gap: 16px;
+      flex-shrink: 0;
     }
 
     .header-back-btn {
@@ -61,14 +73,14 @@
     }
 
     .header-back-btn:hover, .header-back-btn:active {
-      background: rgba(255, 255, 255, 0.18) !important;
+      background: rgba(255, 255, 255, 0.16) !important;
     }
 
     .header-back-btn svg {
       width: 24px;
       height: 24px;
       stroke: #ffffff;
-      stroke-width: 2.6;
+      stroke-width: 2.5;
       stroke-linecap: round;
       stroke-linejoin: round;
       fill: none;
@@ -76,65 +88,34 @@
 
     .header-title-text {
       font-family: 'Fredoka', 'Nunito', sans-serif !important;
-      font-size: 1.4rem !important;
-      font-weight: 600 !important;
+      font-size: 1.35rem !important;
+      font-weight: 700 !important;
       color: #ffffff !important;
-      letter-spacing: 0.3px !important;
+      letter-spacing: 0.2px !important;
       margin: 0 !important;
       text-align: left !important;
+      line-height: 1.2 !important;
     }
 
-    .header-search-btn {
-      background: none !important;
-      border: none !important;
-      cursor: pointer !important;
-      padding: 6px !important;
-      color: #ffffff !important;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-    }
-
-    .header-search-btn.hidden {
-      display: none !important;
-    }
-
-    .header-search-btn svg {
-      width: 22px;
-      height: 22px;
-      stroke: #ffffff;
-      stroke-width: 2.5;
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .page-content {
-      padding: 16px 16px 90px;
-      max-width: 600px;
-      margin: 0 auto;
-    }
-
-    /* Header Search Bar matching Screenshot 4 */
+    /* Active Search Box */
     .header-search-bar {
+      display: none;
       flex: 1;
-      display: flex;
       align-items: center;
-      gap: 10px;
       margin: 0 4px;
       animation: fadeIn 0.15s ease-out;
     }
 
     .header-search-cyan-icon {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       stroke: #38bdf8;
-      stroke-width: 2.6;
+      stroke-width: 2.4;
       fill: none;
       stroke-linecap: round;
       stroke-linejoin: round;
       flex-shrink: 0;
+      margin-right: 8px;
     }
 
     .header-search-input {
@@ -144,76 +125,131 @@
       outline: none;
       color: #ffffff;
       font-family: 'Nunito', sans-serif;
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       font-weight: 600;
       caret-color: #38bdf8;
-      padding: 0;
+      padding: 4px 0;
     }
 
-    .header-search-close-btn {
+    .header-search-input::placeholder {
+      color: rgba(255, 255, 255, 0.65);
+      font-weight: 400;
+    }
+
+    /* Search Action Button */
+    .header-action-btn {
       background: none !important;
       border: none !important;
       cursor: pointer !important;
       padding: 6px !important;
-      color: #c4b5fd !important;
+      margin: 0 !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
+      color: #ffffff !important;
       border-radius: 8px !important;
       flex-shrink: 0 !important;
+      transition: background 0.15s ease;
     }
 
-    .header-search-close-btn svg {
-      width: 24px;
-      height: 24px;
-      stroke: #c4b5fd;
-      stroke-width: 2.4;
+    .header-action-btn:hover, .header-action-btn:active {
+      background: rgba(255, 255, 255, 0.16) !important;
+    }
+
+    .header-action-btn svg {
+      width: 22px;
+      height: 22px;
+      stroke: #ffffff;
       stroke-linecap: round;
       stroke-linejoin: round;
       fill: none;
     }
 
+    .header-action-btn .icon-search {
+      display: block;
+      stroke-width: 2.2;
+    }
+
+    .header-action-btn .icon-close {
+      display: none;
+      stroke-width: 2.4;
+    }
+
+    /* When search mode is active */
+    .app-header.search-mode .header-title-text {
+      display: none !important;
+    }
+
+    .app-header.search-mode .header-search-bar {
+      display: flex !important;
+    }
+
+    .app-header.search-mode .header-action-btn .icon-search {
+      display: none !important;
+    }
+
+    .app-header.search-mode .header-action-btn .icon-close {
+      display: block !important;
+    }
+
+    /* Page Content */
+    .page-content {
+      padding: 14px 12px 100px !important;
+      max-width: 480px;
+      margin: 0 auto;
+      width: 100%;
+      box-sizing: border-box;
+      flex: 1;
+    }
+
+    #requests-list {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+
     /* Request Card */
     .req-card {
       background: #ffffff;
-      border-radius: 14px;
-      padding: 18px 18px 14px;
-      margin-bottom: 14px;
+      border-radius: 16px;
+      padding: 16px 16px 14px 18px;
+      margin: 0;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      animation: fadeIn 0.35s ease-out;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      box-sizing: border-box;
+      width: 100%;
+      animation: fadeIn 0.25s ease-out;
     }
 
-    /* Light Yellow curved shape when pending warden approval */
-    .req-card.is-pending::after {
-      content: '';
-      position: absolute;
-      top: -30px;
-      right: -60px;
-      bottom: -30px;
-      width: 210px;
-      background: #fef08a; /* Soft Light Yellow matching Screenshot 2, 3, 4 */
-      border-radius: 50% 0 0 50% / 100% 0 0 100%;
-      z-index: 0;
-      pointer-events: none;
-      opacity: 0.9;
-    }
-
-    /* Mint Green curved shape when Warden gives approval */
+    /* Mint Green curved organic shape matching Screenshot 1 */
     .req-card.is-approved::after {
       content: '';
       position: absolute;
-      top: -30px;
-      right: -60px;
-      bottom: -30px;
-      width: 210px;
-      background: #cbf6e2; /* Mint Green matching Screenshot 2, 3, 4 */
-      border-radius: 50% 0 0 50% / 100% 0 0 100%;
+      top: -20px;
+      bottom: -20px;
+      right: 0;
+      width: 44%;
+      background: #cbf6e2;
+      border-radius: 100% 0 0 100% / 50% 0 0 50%;
       z-index: 0;
       pointer-events: none;
-      opacity: 0.9;
+    }
+
+    /* Soft Light Yellow curved shape when pending */
+    .req-card.is-pending::after {
+      content: '';
+      position: absolute;
+      top: -20px;
+      bottom: -20px;
+      right: 0;
+      width: 44%;
+      background: #fef08a;
+      border-radius: 100% 0 0 100% / 50% 0 0 50%;
+      z-index: 0;
+      pointer-events: none;
     }
 
     .req-card-content {
@@ -221,41 +257,51 @@
       z-index: 1;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .req-info-row {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 0.92rem;
+      gap: 4px;
+      font-size: 0.93rem;
       color: #111827;
       font-weight: 600;
+      line-height: 1.2;
     }
 
     .req-field-label {
-      width: 55px;
+      width: 54px;
       color: #111827;
       font-weight: 700;
       flex-shrink: 0;
+      font-size: 0.93rem;
     }
 
     .req-date-time-wrap {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      flex-wrap: nowrap;
     }
 
     .req-icon-small {
       width: 17px;
       height: 17px;
-      color: #6b7280;
+      color: #8892a0;
       flex-shrink: 0;
+      display: inline-flex;
+    }
+
+    .req-icon-small.req-icon-user {
+      width: 16px;
+      height: 16px;
     }
 
     .req-divider {
-      color: #9ca3af;
+      color: #cbd5e1;
       margin: 0 4px;
+      font-weight: 400;
     }
 
     .req-timestamp-row {
@@ -265,15 +311,17 @@
       font-size: 0.86rem;
       color: #111827;
       font-weight: 600;
+      line-height: 1.2;
     }
 
     .req-detail-row {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 0.92rem;
+      gap: 8px;
+      font-size: 0.93rem;
       color: #111827;
       font-weight: 600;
+      line-height: 1.2;
     }
 
     .req-status-text {
@@ -281,11 +329,11 @@
       font-weight: 600;
     }
 
-    /* Red Trash Can Delete Button matching Screenshot 2, 3, 4 */
+    /* Red Trash Can Delete Button for pending requests */
     .req-delete-btn {
       position: absolute;
-      top: 14px;
-      right: 14px;
+      top: 12px;
+      right: 12px;
       background: #ef4444;
       border: none;
       border-radius: 6px;
@@ -315,11 +363,12 @@
       stroke-linejoin: round;
     }
 
-    /* Stepper for 3-stage requests (Class Teacher -> HOD -> Warden) */
+    /* Stepper for 3-stage requests matching Screenshot 1 */
     .req-stepper-wrap {
-      margin-top: 6px;
-      padding: 6px 4px 0;
+      margin-top: 4px;
+      padding: 4px 0 2px;
       position: relative;
+      width: 100%;
     }
 
     .req-stepper-track {
@@ -327,9 +376,10 @@
       align-items: center;
       justify-content: space-between;
       position: relative;
+      width: 82%;
+      max-width: 320px;
     }
 
-    /* Line 1 between Dot 1 and Dot 2 */
     .stepper-line {
       position: absolute;
       top: 50%;
@@ -339,13 +389,13 @@
     }
 
     .stepper-line-1 {
-      left: 14px;
-      width: calc(50% - 14px);
+      left: 10px;
+      width: calc(50% - 10px);
     }
 
     .stepper-line-2 {
       left: 50%;
-      width: calc(50% - 14px);
+      width: calc(50% - 10px);
     }
 
     .stepper-line.line-green {
@@ -356,7 +406,7 @@
       background: #e2e8f0;
     }
 
-    /* Checkmark Circle (Approved step) */
+    /* Checkmark Circle (Approved step) matching Screenshot 1 */
     .step-dot-approved {
       width: 20px;
       height: 20px;
@@ -369,7 +419,7 @@
       z-index: 2;
       color: #ffffff;
       box-shadow: 0 0 0 2px #ffffff;
-      cursor: pointer;
+      flex-shrink: 0;
     }
 
     .step-dot-approved svg {
@@ -382,7 +432,7 @@
       stroke-linejoin: round;
     }
 
-    /* Yellow Dot (Pending step matching Screenshot 3 & 4) */
+    /* Yellow Dot (Pending step) */
     .step-dot-pending {
       width: 18px;
       height: 18px;
@@ -395,11 +445,12 @@
       z-index: 2;
       box-shadow: 0 0 0 2px #ffffff;
       cursor: pointer;
+      flex-shrink: 0;
     }
 
-    /* Demo Approval Bar helper */
+    /* Action Bar helper when pending */
     .req-action-bar {
-      margin-top: 8px;
+      margin-top: 6px;
       display: flex;
       align-items: center;
       justify-content: flex-end;
@@ -427,27 +478,30 @@
       border-style: solid;
     }
 
-    /* Floating Action Button */
+    /* Floating Action Button matching Screenshot 1 */
     .fab-new-btn {
       position: fixed;
-      right: 22px;
+      right: 20px;
       bottom: 24px;
-      width: 58px;
-      height: 58px;
+      bottom: calc(max(24px, env(safe-area-inset-bottom, 24px)));
+      right: calc(max(20px, env(safe-area-inset-right, 20px)));
+      width: 56px;
+      height: 56px;
       border-radius: 50%;
-      background: #2b1d6f;
+      background: #2b146f;
       border: none;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 8px 24px rgba(43, 29, 111, 0.4);
-      z-index: 50;
+      box-shadow: 0 4px 16px rgba(43, 20, 111, 0.4);
+      z-index: 90;
       transition: transform 0.15s ease, background 0.15s ease;
+      padding: 0;
     }
 
     .fab-new-btn:hover {
-      background: #392496;
+      background: #391e96;
       transform: scale(1.05);
     }
 
@@ -456,11 +510,12 @@
     }
 
     .fab-new-btn svg {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       stroke: #ffffff;
       stroke-width: 2.8;
       stroke-linecap: round;
+      fill: none;
     }
 
     /* Request Modal Bottom Sheet matching Screenshot 1 & 3 */
@@ -674,32 +729,34 @@
   <div id="confirm-dialog" class="confirm-dialog"></div>
 
   <div class="app-page">
-    <!-- Header matching Screenshot 2 & Screenshot 4 -->
+    <!-- Header matching Screenshot 1 -->
     <header class="app-header" id="app-header">
-      <a href="dashboard.html" class="header-back-btn" id="header-back-btn" aria-label="Back to Dashboard">
-        <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-      </a>
-
-      <!-- Title in normal state -->
-      <h1 class="header-title-text" id="header-title">Request</h1>
-
-      <!-- Active search bar matching Screenshot 4 -->
-      <div class="header-search-bar" id="header-search-bar" style="display:none">
-        <svg class="header-search-cyan-icon" viewBox="0 0 24 24">
-          <circle cx="11" cy="11" r="8"/>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-        </svg>
-        <input type="text" id="header-search-input" class="header-search-input" placeholder="" autocomplete="off" spellcheck="false">
+      <div class="header-left-wrap">
+        <a href="dashboard.html" class="header-back-btn" id="header-back-btn" aria-label="Back to Dashboard">
+          <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        </a>
+        <h1 class="header-title-text" id="header-title">Request</h1>
       </div>
 
-      <!-- Search icon toggle button -->
-      <button class="header-search-btn" id="search-toggle-btn" aria-label="Search Requests">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      </button>
+      <!-- Active search bar (shown only in search mode) -->
+      <div class="header-search-bar" id="header-search-bar">
+        <svg class="header-search-cyan-icon" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="7.5"/>
+          <line x1="21" y1="21" x2="16.5" y2="16.5"/>
+        </svg>
+        <input type="text" id="header-search-input" class="header-search-input" placeholder="Search requests..." autocomplete="off" spellcheck="false">
+      </div>
 
-      <!-- Close search button (purple X) matching Screenshot 4 -->
-      <button class="header-search-close-btn" id="search-close-btn" aria-label="Close Search" style="display:none">
-        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <!-- Action Button: Only Search 🔍 in default state, Close ✕ in search mode -->
+      <button class="header-action-btn" id="header-action-btn" aria-label="Search Requests">
+        <svg class="icon-search" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="7.5"/>
+          <line x1="21" y1="21" x2="16.5" y2="16.5"/>
+        </svg>
+        <svg class="icon-close" viewBox="0 0 24 24">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
       </button>
     </header>
 
@@ -840,20 +897,8 @@
 
     const STORAGE_KEY = 'mei_student_requests_v5';
 
-    // Initial Requests matching User Screenshot 3 (All 3 approved)
+    // Initial Requests matching User Screenshot 1 (Reference)
     const INITIAL_REQUESTS = [
-      {
-        id: 'req_0',
-        fromDate: '07-10-2026',
-        fromTime: '06:00 AM',
-        toDate: '07-10-2026',
-        toTime: '04:30 PM',
-        timestamp: '2026-10-05T12:55:44.383821Z',
-        type: 'Industrial Visit',
-        place: 'friend',
-        status: 'approved', // Approved matching Screenshot 3
-        stage: 3
-      },
       {
         id: 'req_1',
         fromDate: '01-10-2026',
@@ -863,7 +908,7 @@
         timestamp: '05-10-2026 06:25:44 PM',
         type: 'Holiday',
         place: 'home',
-        status: 'approved', // Warden Approved -> Mint Green
+        status: 'approved',
         stage: 1
       },
       {
@@ -873,10 +918,10 @@
         toDate: '25-09-2026',
         toTime: '05:00 PM',
         timestamp: '2026-09-30T13:50:41.623926Z',
-        type: 'Holiday',
-        place: 'home',
+        type: 'Symposium',
+        place: 'kavery Engineering College',
         status: 'approved',
-        stage: 1
+        stage: 3
       },
       {
         id: 'req_3',
@@ -887,8 +932,20 @@
         timestamp: '30-09-2026 07:20:41 PM',
         type: 'Outing',
         place: 'Store',
-        status: 'approved', // Warden Approved -> Mint Green
+        status: 'approved',
         stage: 1
+      },
+      {
+        id: 'req_4',
+        fromDate: '17-09-2026',
+        fromTime: '07:45 AM',
+        toDate: '17-09-2026',
+        toTime: '05:00 PM',
+        timestamp: '2026-09-24T06:09:28.714057Z',
+        type: 'Symposium',
+        place: 'Annapoorana engineering college',
+        status: 'approved',
+        stage: 3
       }
     ];
 
@@ -951,14 +1008,14 @@
         const isApproved = req.status === 'approved';
         const cardClass = isApproved ? 'is-approved' : 'is-pending';
 
-        // Stepper generation for 3-stage requests
+        // Stepper generation for 3-stage requests matching Screenshot 1
         let stepperHTML = '';
         if (!isSingle) {
           const s = req.stage || 0;
           // Step 1: Class Teacher
           const dot1HTML = s >= 1 
             ? `<div class="step-dot-approved" title="Class Teacher: Approved"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>`
-            : `<div class="step-dot-pending" onclick="simulateApproval('${req.id}', event)" title="Class Teacher: Pending (Click to approve)"></div>`;
+            : `<div class="step-dot-pending" onclick="simulateApproval('${req.id}', event)" title="Class Teacher: Pending"></div>`;
           
           // Line 1: between Step 1 and Step 2
           const line1Class = s >= 1 ? 'line-green' : 'line-gray';
@@ -966,7 +1023,7 @@
           // Step 2: HOD
           const dot2HTML = s >= 2 
             ? `<div class="step-dot-approved" title="HOD: Approved"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>`
-            : `<div class="step-dot-pending" onclick="simulateApproval('${req.id}', event)" title="HOD: Pending (Click to approve)"></div>`;
+            : `<div class="step-dot-pending" onclick="simulateApproval('${req.id}', event)" title="HOD: Pending"></div>`;
 
           // Line 2: between Step 2 and Step 3
           const line2Class = s >= 2 ? 'line-green' : 'line-gray';
@@ -974,7 +1031,7 @@
           // Step 3: Warden
           const dot3HTML = s >= 3 
             ? `<div class="step-dot-approved" title="Warden: Approved"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>`
-            : `<div class="step-dot-pending" onclick="simulateApproval('${req.id}', event)" title="Warden: Pending (Click to approve)"></div>`;
+            : `<div class="step-dot-pending" onclick="simulateApproval('${req.id}', event)" title="Warden: Pending"></div>`;
 
           stepperHTML = `
             <div class="req-stepper-wrap">
@@ -997,14 +1054,17 @@
         ` : '';
 
         // Status row
-        const statusRowHTML = isApproved ? `
+        const statusText = req.status ? (req.status.charAt(0).toUpperCase() + req.status.slice(1)) : 'Approved';
+        const statusRowHTML = `
           <div class="req-detail-row">
-            <svg class="req-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg class="req-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              <line x1="8" y1="9" x2="16" y2="9"/>
+              <line x1="8" y1="13" x2="13" y2="13"/>
             </svg>
-            <span class="req-status-text">Approved</span>
+            <span class="req-status-text">${statusText}</span>
           </div>
-        ` : '';
+        `;
 
         // Interactive simulation action bar when pending
         let actionHelperHTML = '';
@@ -1039,12 +1099,12 @@
               <div class="req-info-row">
                 <span class="req-field-label">From :</span>
                 <div class="req-date-time-wrap">
-                  <svg class="req-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg class="req-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
                   </svg>
                   <span>${req.fromDate}</span>
                   <span class="req-divider">|</span>
-                  <svg class="req-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg class="req-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                   </svg>
                   <span>${req.fromTime}</span>
@@ -1055,12 +1115,12 @@
               <div class="req-info-row">
                 <span class="req-field-label">To :</span>
                 <div class="req-date-time-wrap">
-                  <svg class="req-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg class="req-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
                   </svg>
                   <span>${req.toDate}</span>
                   <span class="req-divider">|</span>
-                  <svg class="req-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg class="req-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                   </svg>
                   <span>${req.toTime}</span>
@@ -1069,7 +1129,7 @@
 
               <!-- Row 3: Timestamp -->
               <div class="req-timestamp-row">
-                <svg class="req-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg class="req-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                 </svg>
                 <span>${req.timestamp}</span>
@@ -1077,21 +1137,23 @@
 
               <!-- Row 4: Type -->
               <div class="req-detail-row">
-                <svg class="req-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                <svg class="req-icon-small req-icon-user" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                 </svg>
                 <span>${req.type}</span>
               </div>
 
               <!-- Row 5: Place / Reason -->
               <div class="req-detail-row">
-                <svg class="req-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg class="req-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                  <line x1="8" y1="9" x2="16" y2="9"/>
+                  <line x1="8" y1="13" x2="13" y2="13"/>
                 </svg>
-                <span>${req.place}</span>
+                <span>${req.place || req.reason || ''}</span>
               </div>
 
-              <!-- Row 6: Status if approved -->
+              <!-- Row 6: Status -->
               ${statusRowHTML}
 
               <!-- Row 7: Stepper if 3-stage -->
@@ -1138,41 +1200,56 @@
         modal.classList.remove('show');
       }
     });
-    // Search Controls matching Screenshot 4
-    const searchToggle = document.getElementById('search-toggle-btn');
-    const searchClose = document.getElementById('search-close-btn');
-    const headerTitle = document.getElementById('header-title');
-    const headerSearchBar = document.getElementById('header-search-bar');
-    const searchInput = document.getElementById('header-search-input');
-    const backBtn = document.getElementById('header-back-btn');
 
-    searchToggle.addEventListener('click', () => {
-      headerTitle.style.display = 'none';
-      searchToggle.classList.add('hidden');
-      headerSearchBar.style.display = 'flex';
-      searchClose.style.display = 'flex';
-      searchInput.focus();
-    });
+    // Search Controls matching Screenshot 1
+    const appHeader = document.getElementById('app-header');
+    const headerActionBtn = document.getElementById('header-action-btn');
+    const headerSearchInput = document.getElementById('header-search-input');
+    const headerBackBtn = document.getElementById('header-back-btn');
+
+    let isSearchActive = false;
+
+    function openSearch() {
+      isSearchActive = true;
+      appHeader.classList.add('search-mode');
+      headerActionBtn.setAttribute('aria-label', 'Close Search');
+      setTimeout(() => {
+        headerSearchInput.focus();
+      }, 50);
+    }
 
     function closeSearch() {
-      searchInput.value = '';
-      headerSearchBar.style.display = 'none';
-      searchClose.style.display = 'none';
-      headerTitle.style.display = 'block';
-      searchToggle.classList.remove('hidden');
+      if (!isSearchActive) return;
+      isSearchActive = false;
+      appHeader.classList.remove('search-mode');
+      headerActionBtn.setAttribute('aria-label', 'Search Requests');
+      headerSearchInput.value = '';
       renderRequests(requests);
     }
 
-    searchClose.addEventListener('click', closeSearch);
+    headerActionBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (isSearchActive) {
+        closeSearch();
+      } else {
+        openSearch();
+      }
+    });
 
-    backBtn.addEventListener('click', (e) => {
-      if (headerSearchBar.style.display !== 'none') {
+    headerBackBtn.addEventListener('click', (e) => {
+      if (isSearchActive) {
         e.preventDefault();
         closeSearch();
       }
     });
 
-    searchInput.addEventListener('input', (e) => {
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isSearchActive) {
+        closeSearch();
+      }
+    });
+
+    headerSearchInput.addEventListener('input', (e) => {
       const q = e.target.value.toLowerCase().trim();
       if (!q) {
         renderRequests(requests);
